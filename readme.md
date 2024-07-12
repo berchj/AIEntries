@@ -27,7 +27,7 @@ Clone the project
 Go to the project directory
 
 ```bash
-  cd wordpress-prix
+  cd IAEntries
 ```
 
 Install dependencies
