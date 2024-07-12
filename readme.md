@@ -47,6 +47,12 @@ Clean environments
 ```bash
   npx wp-env clean all
 ```
+
+Make .zip to upload to wordpress
+
+```bash
+  make zip
+```
 ## Features
 
 * Input to ask you what topic to create the post on
