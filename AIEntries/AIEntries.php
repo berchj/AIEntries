@@ -1,14 +1,6 @@
 <?php
 
 /**
- *
- *
- *
- * @author            Julio César Bermúdez
- *
- * @license           GPL-2.0-or-later
- *
- * @wordpress-plugin
  * Plugin Name:       IA Entries
  * Description:       Automates the creation of WordPress site entries based on an AI API call to Google's GEMINI
  * Version:           1.1.0
@@ -19,84 +11,90 @@
  * Plugin URI:        https://github.com/berchj/AIEntries
  * License:           MIT
  */
-function upload_image_to_media_library($image_url, $post_id, $title)
+
+function set_featured_image_from_base64($base64_image, $post_id)
 {
-    require_once ABSPATH . 'wp-admin/includes/file.php';
-    require_once ABSPATH . 'wp-admin/includes/media.php';
-    require_once ABSPATH . 'wp-admin/includes/image.php';
+    // Validar que el post ID sea un entero
+    if (!is_int($post_id)) {
+        return false;
+    }
 
-    // Verificar y ajustar permisos de la carpeta de cargas de WordPress
+    // Decodificar la cadena base64
+    $image_data = base64_decode($base64_image);
+
+    // Crear un archivo temporal para almacenar la imagen
     $upload_dir = wp_upload_dir();
-    $upload_dir_permissions = 0777; // Cambiar permisos a 755
-    $upload_dir_path = $upload_dir['basedir'];
+    $file_path = $upload_dir['path'] . '/' . uniqid() . '.jpg';
+    file_put_contents($file_path, $image_data);
 
-    if (!file_exists($upload_dir_path)) {
-        if (!mkdir($upload_dir_path, $upload_dir_permissions, true)) {
-            echo 'Error al crear directorio de cargas.';
-            return;
-        }
+    // Verificar el tipo MIME del archivo para asegurarse que es una imagen
+    $mime_type = mime_content_type($file_path);
+    if (strpos($mime_type, 'image') === false) {
+        return false;
     }
 
-    if (!is_writable($upload_dir_path)) {
-        if (!chmod($upload_dir_path, $upload_dir_permissions)) {
-            echo 'Error al cambiar permisos de directorio de cargas.';
-            return;
-        }
-    }
-
-    // Obtener el tipo de archivo basado en la URL de la imagen
-    $filetype = wp_check_filetype(basename($image_url), null);
+    // Subir el archivo a la biblioteca de medios de WordPress
+    $filetype = wp_check_filetype(basename($file_path), null);
 
     $attachment = array(
+        'guid' => $upload_dir['url'] . '/' . basename($file_path),
         'post_mime_type' => $filetype['type'],
-        'post_title' => sanitize_file_name($title),
+        'post_title' => sanitize_file_name(basename($file_path)),
         'post_content' => '',
         'post_status' => 'inherit',
     );
 
-    // Subir la imagen a la biblioteca de medios
-    $attachment_id = media_handle_sideload(array('name' => basename($image_url), 'file' => $image_url), $post_id, $title, $attachment);
+    $attach_id = wp_insert_attachment($attachment, $file_path, $post_id);
 
-    if (is_wp_error($attachment_id)) {
-        // Manejar el error si la carga de la imagen falla
-        echo 'Error al subir la imagen: ' . $attachment_id->get_error_message();
-        return;
-    }
+    // Generar metadatos para el archivo adjunto y las diferentes miniaturas
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+    $attach_data = wp_generate_attachment_metadata($attach_id, $file_path);
+    wp_update_attachment_metadata($attach_id, $attach_data);
 
-    // Asignar la imagen como miniatura del post
-    set_post_thumbnail($post_id, $attachment_id);
-    return $attachment_id;
+    // Establecer como imagen destacada del post
+    set_post_thumbnail($post_id, $attach_id);
+
+    return true;
 }
 
 function generate_post_image_with_AI($title)
 {
-    $url = 'https://api.limewire.com/api/image/generation';
-    $api_key = 'lmwr_sk_8lbP6JknCR_51LhiyJPHHXSjEhPlOFhrr6oU1kumueZRYMCL'; // Reemplaza con tu clave de API Limewire
+    $base_url = 'https://api.stability.ai';
+    $url = "$base_url/v1/generation/stable-diffusion-v1-6/text-to-image";
 
-    $args = array(
-        'timeout' => 60,
-        'body' => json_encode(array(
-            'prompt' => $title,
-            'aspect_ratio' => '1:1',
-        )),
-        'headers' => array(
-            'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . $api_key,
-            'Content-Type' => 'application/json',
-            'X-Api-Version' => 'v1',
+    // Obtener la clave API de Stable Diffusion desde las opciones almacenadas
+    $api_key_stable_diffusion = get_option('AIEntries_api_key_stable_diffusion', '');
+
+    $body = json_encode(array(
+        "text_prompts" => array(
+            array(
+                "text" => $title,
+            ),
         ),
-    );
+        "cfg_scale" => 7,
+        "height" => 1024,
+        "width" => 1024,
+        "samples" => 1,
+        "steps" => 30,
+    ));
 
-    $response = wp_remote_post($url, $args);
-
+    $response = wp_remote_post($url, array(
+        'timeout' => 600,
+        'method' => 'POST',
+        'headers' => array(
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'Authorization' => "Bearer $api_key_stable_diffusion",
+        ),
+        'body' => $body,
+    ));
     if (is_wp_error($response)) {
-        return 'Error: ' . $response->get_error_message();
+        echo 'Error occurred: ' . $response->get_error_message();
     }
 
-    $body = wp_remote_retrieve_body($response);
-    print_r($body);
-    return json_decode($body, true)['data'][0]['asset_url'];
+    $body_request = json_decode($response['body'], true);
 
+    return $body_request['artifacts'][0]['base64'];
 }
 
 function create_new_entry($title, $content, $category_name)
@@ -137,14 +135,13 @@ function create_new_entry($title, $content, $category_name)
         if (is_wp_error($post_id)) {
             echo 'There was an error creating the post: ' . $post_id->get_error_message();
         } else {
-            /* //get image url
-            $image_url = generate_post_image_with_AI($title);
-            //upload image
-            $image_id = upload_image_to_media_library($image_url, $post_id, $title);
-            // Verificar si la carga de la imagen fue exitosa
-            if ($image_id) {
-            echo 'Imagen subida correctamente con ID: ' . $image_id;
-            } */
+
+            //get image base64
+            $base64_image = generate_post_image_with_AI($title);
+
+            //save image into post
+            set_featured_image_from_base64($base64_image,$post_id);
+
             //return
             return get_post($post_id);
         }
@@ -231,19 +228,21 @@ function AIEntries_settings_page()
         $num_calls = intval($_POST['num_calls']);
         $api_key = sanitize_text_field($_POST['api_key']);
         $category_name = sanitize_text_field($_POST['category']);
+        // Añadir campo para la clave API de Stable Diffusion
+        $api_key_stable_diffusion = sanitize_text_field($_POST['api_key_stable_diffusion']);
 
         update_option('AIEntries_question', $question);
         update_option('AIEntries_num_calls', $num_calls);
         update_option('AIEntries_api_key', $api_key);
         update_option('AIEntries_category', $category_name);
+        update_option('AIEntries_api_key_stable_diffusion', $api_key_stable_diffusion);
 
         $responses = [];
         $errors = [];
 
         if ($num_calls > 0) {
             for ($i = 0; $i < $num_calls; $i++) {
-
-                $i > 0 ? $response = call($question, $api_key, $category_name, '') : $response = call($question, $api_key, $category_name, 'more distinct');
+                $response = $i > 0 ? call($question, $api_key, $category_name, '') : call($question, $api_key, $category_name, 'more distinct');
 
                 if (!is_wp_error($response)) {
                     $responses[] = $response;
@@ -263,11 +262,13 @@ function AIEntries_settings_page()
     $num_calls = get_option('AIEntries_num_calls', 1);
     $api_key = get_option('AIEntries_api_key', '');
     $category_name = get_option('AIEntries_category', '');
+    // Recuperar opción para la clave API de Stable Diffusion
+    $api_key_stable_diffusion = get_option('AIEntries_api_key_stable_diffusion', '');
 
     ?>
     <div class="wrap">
         <h2>AIEntries Settings</h2>
-        <p>The api call returns jsons using this JSON schema : <code>{'title': str,'content':str}</code> to automatize the creation of wordpress posts</p>
+        <p>The api call returns jsons using this JSON schema : <code>{'title': str,'content':str}</code> to automate the creation of WordPress posts</p>
         <p>This plugin runs once a day according to the following parameters:</p>
 
         <form method="post" action="">
@@ -283,7 +284,11 @@ function AIEntries_settings_page()
                 <h3>GEMINI API Key:</h3>
             </label>
             <input type="password" id="api_key" name="api_key" value="<?php echo esc_attr($api_key); ?>" required><br>
-            <p>note: You can get one for free <a target="_blank" href="https://ai.google.dev/gemini-api/docs/api-key?hl=es-419">here</a></p>
+            <p>Note: You can get one for free <a target="_blank" href="https://ai.google.dev/gemini-api/docs/api-key?hl=es-419">here</a></p>
+            <label for="api_key_stable_diffusion">
+                <h3>Stable Diffusion API Key:</h3>
+            </label>
+            <input type="password" id="api_key_stable_diffusion" name="api_key_stable_diffusion" value="<?php echo esc_attr($api_key_stable_diffusion); ?>" required><br>
             <label for="category">
                 <h3>Category Name for the posts:</h3>
             </label>
@@ -296,20 +301,19 @@ function AIEntries_settings_page()
             <p>The creation of the posts could fail due to the request made to the model API, remember that if the API key you are using is free it could generate this type of errors due to limitations with the requests.
                 For more information <a target="_blank" href="https://gemini.google.com/advanced?utm_source=google&utm_medium=cpc&utm_campaign=sem_lp_sl&gad_source=1&gclid=CjwKCAjwqMO0BhA8EiwAFTLgII3-Yyyf4-LZHwQgJNtl7-LAGz9OmcyBNtUVowaQXhznCYZx3qlGCxoCyvUQAvD_BwE">click here</a></p>
             <?php foreach ($errors as $error): ?>
-                <p style="color: red;"> 1 post create failed due <?php echo esc_html($error); ?></p>
-            <?php endforeach;?>
-        <?php endif;?>
+                <p style="color: red;">1 post create failed due to: <?php echo esc_html($error); ?></p>
+            <?php endforeach; ?>
+        <?php endif; ?>
 
         <?php if (!empty($responses)): ?>
             <h3>Posts Created by GEMINI's API Call:</h3>
             <?php foreach ($responses as $response): ?>
-                <pre><a href="<?php echo get_post_permalink($response->ID); ?>" target="_blank" ><?php echo get_the_title($response->ID); ?></a></pre>
-            <?php endforeach;?>
-        <?php endif;?>
-        <p style="color: red;"><b>DISCLAIMER: this is an in-progress project . The quantity of posts created by this plugin depents on your api key limitations</b></p>
-
+                <pre><a href="<?php echo get_post_permalink($response->ID); ?>" target="_blank"><?php echo get_the_title($response->ID); ?></a></pre>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        <p style="color: red;"><b>DISCLAIMER: this is a work in progress. The quantity of posts created by this plugin depends on your API key limitations</b></p>
     </div>
-<?php
+    <?php
 }
 
 function AIEntries_daily_task()
