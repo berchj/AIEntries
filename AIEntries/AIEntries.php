@@ -1,16 +1,16 @@
 <?php
 
 /**
- * 
  *
- * 
+ *
+ *
  * @author            Julio César Bermúdez
  *
  * @license           GPL-2.0-or-later
  *
  * @wordpress-plugin
- * Plugin Name:       IA Entries 
- * Description:       Automates the creation of WordPress site entries based on an AI API call to Google's GEMINI 
+ * Plugin Name:       IA Entries
+ * Description:       Automates the creation of WordPress site entries based on an AI API call to Google's GEMINI
  * Version:           1.1.0
  * Requires at least: 5.2
  * Requires PHP:      7.2
@@ -19,6 +19,85 @@
  * Plugin URI:        https://github.com/berchj/AIEntries
  * License:           MIT
  */
+function upload_image_to_media_library($image_url, $post_id, $title)
+{
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+    require_once ABSPATH . 'wp-admin/includes/media.php';
+    require_once ABSPATH . 'wp-admin/includes/image.php';
+
+    // Verificar y ajustar permisos de la carpeta de cargas de WordPress
+    $upload_dir = wp_upload_dir();
+    $upload_dir_permissions = 0777; // Cambiar permisos a 755
+    $upload_dir_path = $upload_dir['basedir'];
+
+    if (!file_exists($upload_dir_path)) {
+        if (!mkdir($upload_dir_path, $upload_dir_permissions, true)) {
+            echo 'Error al crear directorio de cargas.';
+            return;
+        }
+    }
+
+    if (!is_writable($upload_dir_path)) {
+        if (!chmod($upload_dir_path, $upload_dir_permissions)) {
+            echo 'Error al cambiar permisos de directorio de cargas.';
+            return;
+        }
+    }
+
+    // Obtener el tipo de archivo basado en la URL de la imagen
+    $filetype = wp_check_filetype(basename($image_url), null);
+
+    $attachment = array(
+        'post_mime_type' => $filetype['type'],
+        'post_title' => sanitize_file_name($title),
+        'post_content' => '',
+        'post_status' => 'inherit',
+    );
+
+    // Subir la imagen a la biblioteca de medios
+    $attachment_id = media_handle_sideload(array('name' => basename($image_url), 'file' => $image_url), $post_id, $title, $attachment);
+
+    if (is_wp_error($attachment_id)) {
+        // Manejar el error si la carga de la imagen falla
+        echo 'Error al subir la imagen: ' . $attachment_id->get_error_message();
+        return;
+    }
+
+    // Asignar la imagen como miniatura del post
+    set_post_thumbnail($post_id, $attachment_id);
+    return $attachment_id;
+}
+
+function generate_post_image_with_AI($title)
+{
+    $url = 'https://api.limewire.com/api/image/generation';
+    $api_key = 'lmwr_sk_8lbP6JknCR_51LhiyJPHHXSjEhPlOFhrr6oU1kumueZRYMCL'; // Reemplaza con tu clave de API Limewire
+
+    $args = array(
+        'timeout' => 60,
+        'body' => json_encode(array(
+            'prompt' => $title,
+            'aspect_ratio' => '1:1',
+        )),
+        'headers' => array(
+            'Accept' => 'application/json',
+            'Authorization' => 'Bearer ' . $api_key,
+            'Content-Type' => 'application/json',
+            'X-Api-Version' => 'v1',
+        ),
+    );
+
+    $response = wp_remote_post($url, $args);
+
+    if (is_wp_error($response)) {
+        return 'Error: ' . $response->get_error_message();
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    print_r($body);
+    return json_decode($body, true)['data'][0]['asset_url'];
+
+}
 
 function create_new_entry($title, $content, $category_name)
 {
@@ -29,8 +108,8 @@ function create_new_entry($title, $content, $category_name)
         if (!$category_id) {
             // Create the category
             $new_category = wp_insert_term(
-                $category_name,  // The term which you want to insert
-                'category'       // The taxonomy to which the term belongs
+                $category_name, // The term which you want to insert
+                'category' // The taxonomy to which the term belongs
             );
 
             if (is_wp_error($new_category)) {
@@ -45,10 +124,10 @@ function create_new_entry($title, $content, $category_name)
 
         // Define the post data
         $new_entry = array(
-            'post_title'    => $title,
-            'post_content'  => $content,
-            'post_status'   => 'publish', // Options: 'publish', 'draft', 'private', 'pending'            
-            'post_category' => array($category_id) // Categoría de la publicación
+            'post_title' => $title,
+            'post_content' => $content,
+            'post_status' => 'publish', // Options: 'publish', 'draft', 'private', 'pending'
+            'post_category' => array($category_id), // Categoría de la publicación
         );
 
         // Insert the post into the database
@@ -58,6 +137,15 @@ function create_new_entry($title, $content, $category_name)
         if (is_wp_error($post_id)) {
             echo 'There was an error creating the post: ' . $post_id->get_error_message();
         } else {
+            /* //get image url
+            $image_url = generate_post_image_with_AI($title);
+            //upload image
+            $image_id = upload_image_to_media_library($image_url, $post_id, $title);
+            // Verificar si la carga de la imagen fue exitosa
+            if ($image_id) {
+            echo 'Imagen subida correctamente con ID: ' . $image_id;
+            } */
+            //return
             return get_post($post_id);
         }
     } else {
@@ -79,7 +167,7 @@ function AIEntries_menu()
     );
 }
 
-function call($question, $api_key, $category_name,$iterator = "")
+function call($question, $api_key, $category_name, $iterator = "")
 {
     // URL for the API call
     $url = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' . $api_key;
@@ -91,16 +179,16 @@ function call($question, $api_key, $category_name,$iterator = "")
                 array(
                     "parts" => array(
                         array(
-                            "text" => "List 1 ". $iterator ." article about " . $question . ". Using this JSON schema : {'title': str,'content':str} (Return only the JSON String without spaces) the title must be good for SEO"
-                        )
-                    )
-                )
-            )
+                            "text" => "List 1 " . $iterator . " article about " . $question . ". Using this JSON schema :{'title': str,'content':str} (Return only the JSON String without spaces) the title must be good for SEO and the content must be in html string",
+                        ),
+                    ),
+                ),
+            ),
         )),
         'headers' => array(
             'Content-Type' => 'application/json',
         ),
-        'method' => 'POST'
+        'method' => 'POST',
     );
 
     // Response
@@ -125,7 +213,7 @@ function call($question, $api_key, $category_name,$iterator = "")
         return new WP_Error('api_error', 'Invalid API response structure.');
     }
 
-    // AI Post 
+    // AI Post
     $article = json_decode($data['candidates'][0]['content']['parts'][0]['text'], true);
 
     if (!isset($article['title']) || !isset($article['content'])) {
@@ -154,8 +242,8 @@ function AIEntries_settings_page()
 
         if ($num_calls > 0) {
             for ($i = 0; $i < $num_calls; $i++) {
-                
-                $i > 0 ? $response = call($question, $api_key, $category_name,'') : $response = call($question, $api_key, $category_name, 'more');
+
+                $i > 0 ? $response = call($question, $api_key, $category_name, '') : $response = call($question, $api_key, $category_name, 'more distinct');
 
                 if (!is_wp_error($response)) {
                     $responses[] = $response;
@@ -176,7 +264,7 @@ function AIEntries_settings_page()
     $api_key = get_option('AIEntries_api_key', '');
     $category_name = get_option('AIEntries_category', '');
 
-?>
+    ?>
     <div class="wrap">
         <h2>AIEntries Settings</h2>
         <p>The api call returns jsons using this JSON schema : <code>{'title': str,'content':str}</code> to automatize the creation of wordpress posts</p>
@@ -184,7 +272,7 @@ function AIEntries_settings_page()
 
         <form method="post" action="">
             <label for="question">
-                <h3>The theme about the entries you want to create:</h3>
+                <h3>Theme about the entries you want to create:</h3>
             </label>
             <input type="text" id="question" name="question" value="<?php echo esc_attr($question); ?>" required><br>
             <label for="num_calls">
@@ -192,7 +280,7 @@ function AIEntries_settings_page()
             </label>
             <input type="number" id="num_calls" name="num_calls" min="1" value="<?php echo intval($num_calls); ?>" required><br>
             <label for="api_key">
-                <h3>API Key:</h3>
+                <h3>GEMINI API Key:</h3>
             </label>
             <input type="password" id="api_key" name="api_key" value="<?php echo esc_attr($api_key); ?>" required><br>
             <p>note: You can get one for free <a target="_blank" href="https://ai.google.dev/gemini-api/docs/api-key?hl=es-419">here</a></p>
@@ -203,23 +291,23 @@ function AIEntries_settings_page()
             <input type="submit" name="submit" value="Submit">
         </form>
 
-        <?php if (!empty($errors)) : ?>
-            <h3>Errors during creation of posts:</h3>
+        <?php if (!empty($errors)): ?>
+            <h3>Errors during creation of posts: <?php echo count($errors) ?></h3>
             <p>The creation of the posts could fail due to the request made to the model API, remember that if the API key you are using is free it could generate this type of errors due to limitations with the requests.
                 For more information <a target="_blank" href="https://gemini.google.com/advanced?utm_source=google&utm_medium=cpc&utm_campaign=sem_lp_sl&gad_source=1&gclid=CjwKCAjwqMO0BhA8EiwAFTLgII3-Yyyf4-LZHwQgJNtl7-LAGz9OmcyBNtUVowaQXhznCYZx3qlGCxoCyvUQAvD_BwE">click here</a></p>
-            <?php foreach ($errors as $error) : ?>
-                <p style="color: red;"><?php echo esc_html($error); ?></p>
-            <?php endforeach; ?>
-        <?php endif; ?>
+            <?php foreach ($errors as $error): ?>
+                <p style="color: red;"> 1 post create failed due <?php echo esc_html($error); ?></p>
+            <?php endforeach;?>
+        <?php endif;?>
 
-        <?php if (!empty($responses)) : ?>
+        <?php if (!empty($responses)): ?>
             <h3>Posts Created by GEMINI's API Call:</h3>
-            <?php foreach ($responses as $response) : ?>
-                <pre><?php echo get_the_title($response->ID); ?></pre>
-            <?php endforeach; ?>
-        <?php endif; ?>
+            <?php foreach ($responses as $response): ?>
+                <pre><a href="<?php echo get_post_permalink($response->ID); ?>" target="_blank" ><?php echo get_the_title($response->ID); ?></a></pre>
+            <?php endforeach;?>
+        <?php endif;?>
         <p style="color: red;"><b>DISCLAIMER: this is an in-progress project . The quantity of posts created by this plugin depents on your api key limitations</b></p>
-        
+
     </div>
 <?php
 }
@@ -262,4 +350,3 @@ function AIEntries_deactivation()
     $timestamp = wp_next_scheduled('AIEntries_daily_cron_job');
     wp_unschedule_event($timestamp, 'AIEntries_daily_cron_job');
 }
-

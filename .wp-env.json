@@ -1,4 +1,3 @@
 {
-    "plugins": ["./AIEntries/"]
-  }
-  
+  "plugins": ["./AIEntries/"]
+}

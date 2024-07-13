@@ -36,16 +36,28 @@ Install dependencies
   npm i
 ```
 
-Start the server
+Start local environment
 
 ```bash
-  npx wp-env start
+  make test
 ```
 
 Clean environments
 
 ```bash
-  npx wp-env clean all
+  make clear
+```
+
+Debug environment
+
+```bash
+  make debug
+```
+
+Destroy environment
+
+```bash
+  make destroy
 ```
 
 Make .zip to upload to wordpress
@@ -53,6 +65,9 @@ Make .zip to upload to wordpress
 ```bash
   make zip
 ```
+
+
+
 ## Features
 
 * Input to ask you what topic to create the post on
