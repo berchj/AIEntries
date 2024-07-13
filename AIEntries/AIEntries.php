@@ -16,8 +16,8 @@
  * Requires PHP:      7.2
  * Author:            Julio Bermúdez
  * Author URI:        https://github.com/berchj/
- * License:           GPL v2 or later
- * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Plugin URI:        https://github.com/berchj/AIEntries
+ * License:           MIT
  */
 
 function create_new_entry($title, $content, $category_name)
@@ -47,8 +47,7 @@ function create_new_entry($title, $content, $category_name)
         $new_entry = array(
             'post_title'    => $title,
             'post_content'  => $content,
-            'post_status'   => 'publish', // Options: 'publish', 'draft', 'private', 'pending'
-            'post_author'   => 1,  // Author ID
+            'post_status'   => 'publish', // Options: 'publish', 'draft', 'private', 'pending'            
             'post_category' => array($category_id) // Categoría de la publicación
         );
 
@@ -67,32 +66,32 @@ function create_new_entry($title, $content, $category_name)
 }
 
 // Hook to add the menu page
-add_action('admin_menu', 'iaentries_menu');
+add_action('admin_menu', 'AIEntries_menu');
 
-function iaentries_menu()
+function AIEntries_menu()
 {
     add_menu_page(
-        'IAEntries Settings', // Page title
-        'IAEntries', // Menu title
+        'AIEntries Settings', // Page title
+        'AIEntries', // Menu title
         'manage_options', // Required capability to access
-        'iaentries-settings', // Page slug
-        'iaentries_settings_page' // Function to display the page content
+        'AIEntries-settings', // Page slug
+        'AIEntries_settings_page' // Function to display the page content
     );
 }
 
-function call($question, $api_key, $category_name)
+function call($question, $api_key, $category_name,$iterator = "")
 {
     // URL for the API call
     $url = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' . $api_key;
     // Request arguments
     $args = array(
-        'timeout' => 30,
+        'timeout' => 60,
         'body' => json_encode(array(
             "contents" => array(
                 array(
                     "parts" => array(
                         array(
-                            "text" => "List 1 article about " . $question . ". Using this JSON schema : {'title': str,'content':str} (Return only the JSON String without spaces)"
+                            "text" => "List 1 ". $iterator ." article about " . $question . ". Using this JSON schema : {'title': str,'content':str} (Return only the JSON String without spaces) the title must be good for SEO"
                         )
                     )
                 )
@@ -137,7 +136,7 @@ function call($question, $api_key, $category_name)
     return create_new_entry($article['title'], $article['content'], $category_name);
 }
 
-function iaentries_settings_page()
+function AIEntries_settings_page()
 {
     if (isset($_POST['submit'])) {
         $question = sanitize_text_field($_POST['question']);
@@ -145,17 +144,18 @@ function iaentries_settings_page()
         $api_key = sanitize_text_field($_POST['api_key']);
         $category_name = sanitize_text_field($_POST['category']);
 
-        update_option('iaentries_question', $question);
-        update_option('iaentries_num_calls', $num_calls);
-        update_option('iaentries_api_key', $api_key);
-        update_option('iaentries_category', $category_name);
+        update_option('AIEntries_question', $question);
+        update_option('AIEntries_num_calls', $num_calls);
+        update_option('AIEntries_api_key', $api_key);
+        update_option('AIEntries_category', $category_name);
 
         $responses = [];
         $errors = [];
 
         if ($num_calls > 0) {
             for ($i = 0; $i < $num_calls; $i++) {
-                $response = call($question, $api_key, $category_name);
+                
+                $i > 0 ? $response = call($question, $api_key, $category_name,'') : $response = call($question, $api_key, $category_name, 'more');
 
                 if (!is_wp_error($response)) {
                     $responses[] = $response;
@@ -171,14 +171,14 @@ function iaentries_settings_page()
         $errors = [];
     }
 
-    $question = get_option('iaentries_question', '');
-    $num_calls = get_option('iaentries_num_calls', 1);
-    $api_key = get_option('iaentries_api_key', '');
-    $category_name = get_option('iaentries_category', '');
+    $question = get_option('AIEntries_question', '');
+    $num_calls = get_option('AIEntries_num_calls', 1);
+    $api_key = get_option('AIEntries_api_key', '');
+    $category_name = get_option('AIEntries_category', '');
 
 ?>
     <div class="wrap">
-        <h2>IAEntries Settings</h2>
+        <h2>AIEntries Settings</h2>
         <p>The api call returns jsons using this JSON schema : <code>{'title': str,'content':str}</code> to automatize the creation of wordpress posts</p>
         <p>This plugin runs once a day according to the following parameters:</p>
 
@@ -195,6 +195,7 @@ function iaentries_settings_page()
                 <h3>API Key:</h3>
             </label>
             <input type="password" id="api_key" name="api_key" value="<?php echo esc_attr($api_key); ?>" required><br>
+            <p>note: You can get one for free <a target="_blank" href="https://ai.google.dev/gemini-api/docs/api-key?hl=es-419">here</a></p>
             <label for="category">
                 <h3>Category Name for the posts:</h3>
             </label>
@@ -205,7 +206,7 @@ function iaentries_settings_page()
         <?php if (!empty($errors)) : ?>
             <h3>Errors during creation of posts:</h3>
             <p>The creation of the posts could fail due to the request made to the model API, remember that if the API key you are using is free it could generate this type of errors due to limitations with the requests.
-                For more information <a target="_blank" href="https://ai.google.dev/api/rest/v1beta/models/generateContent?hl=es-419">click here</a></p>
+                For more information <a target="_blank" href="https://gemini.google.com/advanced?utm_source=google&utm_medium=cpc&utm_campaign=sem_lp_sl&gad_source=1&gclid=CjwKCAjwqMO0BhA8EiwAFTLgII3-Yyyf4-LZHwQgJNtl7-LAGz9OmcyBNtUVowaQXhznCYZx3qlGCxoCyvUQAvD_BwE">click here</a></p>
             <?php foreach ($errors as $error) : ?>
                 <p style="color: red;"><?php echo esc_html($error); ?></p>
             <?php endforeach; ?>
@@ -217,17 +218,18 @@ function iaentries_settings_page()
                 <pre><?php echo get_the_title($response->ID); ?></pre>
             <?php endforeach; ?>
         <?php endif; ?>
-        <p style="color: red;"><b>DISCLAIMER: this is an in-progress project .</b></p>
+        <p style="color: red;"><b>DISCLAIMER: this is an in-progress project . The quantity of posts created by this plugin depents on your api key limitations</b></p>
+        
     </div>
 <?php
 }
 
-function iaentries_daily_task()
+function AIEntries_daily_task()
 {
-    $question = get_option('iaentries_question', '');
-    $num_calls = get_option('iaentries_num_calls', 1);
-    $api_key = get_option('iaentries_api_key', '');
-    $category_name = get_option('iaentries_category', '');
+    $question = get_option('AIEntries_question', '');
+    $num_calls = get_option('AIEntries_num_calls', 1);
+    $api_key = get_option('AIEntries_api_key', '');
+    $category_name = get_option('AIEntries_category', '');
 
     if (!empty($question) && $num_calls > 0) {
         for ($i = 0; $i < $num_calls; $i++) {
@@ -237,27 +239,27 @@ function iaentries_daily_task()
 }
 
 // Schedule cron task
-if (!wp_next_scheduled('iaentries_daily_cron_job')) {
-    wp_schedule_event(time(), 'daily', 'iaentries_daily_cron_job');
+if (!wp_next_scheduled('AIEntries_daily_cron_job')) {
+    wp_schedule_event(time(), 'daily', 'AIEntries_daily_cron_job');
 }
 
 // Hook to execute the task
-add_action('iaentries_daily_cron_job', 'iaentries_daily_task');
+add_action('AIEntries_daily_cron_job', 'AIEntries_daily_task');
 
 // On plugin activation, ensure the cron job is scheduled
-register_activation_hook(__FILE__, 'iaentries_activation');
-function iaentries_activation()
+register_activation_hook(__FILE__, 'AIEntries_activation');
+function AIEntries_activation()
 {
-    if (!wp_next_scheduled('iaentries_daily_cron_job')) {
-        wp_schedule_event(time(), 'daily', 'iaentries_daily_cron_job');
+    if (!wp_next_scheduled('AIEntries_daily_cron_job')) {
+        wp_schedule_event(time(), 'daily', 'AIEntries_daily_cron_job');
     }
 }
 
 // On plugin deactivation, remove the cron job
-register_deactivation_hook(__FILE__, 'iaentries_deactivation');
-function iaentries_deactivation()
+register_deactivation_hook(__FILE__, 'AIEntries_deactivation');
+function AIEntries_deactivation()
 {
-    $timestamp = wp_next_scheduled('iaentries_daily_cron_job');
-    wp_unschedule_event($timestamp, 'iaentries_daily_cron_job');
+    $timestamp = wp_next_scheduled('AIEntries_daily_cron_job');
+    wp_unschedule_event($timestamp, 'AIEntries_daily_cron_job');
 }
 

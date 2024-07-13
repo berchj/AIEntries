@@ -1,5 +1,5 @@
 
-# IAEntries Plugin
+# AIEntries Plugin
 
 This plugin uses Google's artificial intelligence (GEMINI) to automate the creation of WordPress Posts based on configurable parameters from the WordPress administrator view.
 
@@ -21,13 +21,13 @@ You can get one for free here : https://ai.google.dev/gemini-api/docs/api-key?hl
 Clone the project
 
 ```bash
-  git clone https://github.com/berchj/IAEntries.git
+  git clone https://github.com/berchj/AIEntries.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd IAEntries
+  cd AIEntries
 ```
 
 Install dependencies
