@@ -1,3 +1,3 @@
-# Comando para empaquetar la carpeta en un archivo ZIP
+# Create Zip file
 zip:
-	zip -r AIEntries.zip AIEntries
+	zip -r -v -FS AIEntries.zip AIEntries
