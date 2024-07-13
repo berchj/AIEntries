@@ -9,7 +9,15 @@ This plugin uses Google's artificial intelligence (GEMINI) to automate the creat
 You need to have a GEMINI API KEY to use this plugin. 
 
 You can get one for free here : https://ai.google.dev/gemini-api/docs/api-key?hl=es-419
+
 ## Run this project locally
+
+You need to have installed first: 
+
+* nodejs
+* npm
+* Docker
+
 
 Clone the project
 
