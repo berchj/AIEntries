@@ -4,13 +4,6 @@
 This plugin uses Google's artificial intelligence (GEMINI) to automate the creation of WordPress Posts based on configurable parameters from the WordPress administrator view.
 
 
-
-
-## Requirements 
-
-You need to have a GEMINI API KEY to use this plugin. 
-
-You can get one for free here : https://ai.google.dev/gemini-api/docs/api-key?hl=es-419
 ## Requirements 
 
 You need to have a GEMINI API KEY to use this plugin. 
