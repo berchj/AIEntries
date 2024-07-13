@@ -1,6 +1,6 @@
 # Comando para empaquetar la carpeta en un archivo ZIP
 zip:
-	zip -r -v -FS AIEntries.zip AIEntries
+	zip -r -v -FS ai-entries.zip ai-entries
 
 # Run locally
 test: 
