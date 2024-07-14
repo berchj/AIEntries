@@ -9,7 +9,7 @@ class AIEntries_API {
         // Request arguments
         $args = array(
             'timeout' => 60,
-            'body' => json_encode(array(
+            'body' => wp_json_encode(array(
                 "contents" => array(
                     array(
                         "parts" => array(
@@ -96,7 +96,7 @@ class AIEntries_API {
         $url = "$base_url/v1/generation/stable-diffusion-v1-6/text-to-image";
         $api_key_stable_diffusion = get_option('AIEntries_api_key_stable_diffusion', '');
 
-        $body = json_encode(array(
+        $body = wp_json_encode(array(
             "text_prompts" => array(array("text" => $title)),
             "cfg_scale" => 7,
             "height" => 1024,
@@ -128,32 +128,45 @@ class AIEntries_API {
         if (!is_int($post_id)) {
             return false;
         }
-
-        $image_data = base64_decode($base64_image);
+    
+        // Inicializar WP_Filesystem
+        WP_Filesystem();
+        
+        global $wp_filesystem;
+        
         $upload_dir = wp_upload_dir();
         $file_path = $upload_dir['path'] . '/' . uniqid() . '.jpg';
-        file_put_contents($file_path, $image_data);
+    
+        // Usar WP_Filesystem para escribir el contenido en el archivo
+        if (!$wp_filesystem->put_contents($file_path, base64_decode($base64_image), FS_CHMOD_FILE)) {
+            return false;
+        }
+    
         $mime_type = mime_content_type($file_path);
-
+    
         if (strpos($mime_type, 'image') === false) {
             return false;
         }
-
+    
         $filetype = wp_check_filetype(basename($file_path), null);
+        
         $attachment = array(
             'guid' => $upload_dir['url'] . '/' . basename($file_path),
             'post_mime_type' => $filetype['type'],
             'post_title' => sanitize_file_name(basename($file_path)),
             'post_content' => '',
-            'post_status' => 'inherit',
+            'post_status' => 'inherit'
         );
-
+    
         $attach_id = wp_insert_attachment($attachment, $file_path, $post_id);
+        
         require_once ABSPATH . 'wp-admin/includes/image.php';
+        
         $attach_data = wp_generate_attachment_metadata($attach_id, $file_path);
         wp_update_attachment_metadata($attach_id, $attach_data);
         set_post_thumbnail($post_id, $attach_id);
-
+    
         return true;
     }
+    
 }

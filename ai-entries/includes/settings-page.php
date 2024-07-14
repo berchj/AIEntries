@@ -1,23 +1,24 @@
 <div class="wrap">
-    <h2>AIEntries Settings</h2>    
+    <h2>AIEntries Settings</h2>
     <p>This plugin runs once a day according to the following parameters:</p>
 
     <form method="post" action="">
+    <?php wp_nonce_field('aic_entries_settings_nonce', 'aic_entries_nonce');?>
         <label for="question">
             <h3>Theme about the entries you want to create:</h3>
         </label>
         <input type="text" id="question" name="question" value="<?php echo esc_attr($question); ?>" required><br>
         <label for="num_calls">
-            <h3>Number of posts created based on GEMINI API Call (we recommend 10 because possible errors calling the API):</h3>
+            <h3>Number of posts created based on GEMINI API Call (we recommend 5 because possible errors calling the API):</h3>
         </label>
-        <input type="number" id="num_calls" name="num_calls" min="1" value="<?php echo intval($num_calls); ?>" required><br>
+        <input type="number" id="num_calls" name="num_calls" min="1" max="5" value="<?php echo intval($num_calls); ?>" required><br>
         <label for="api_key">
             <h3>GEMINI API Key:</h3>
         </label>
         <input type="password" id="api_key" name="api_key" value="<?php echo esc_attr($api_key); ?>" required><br>
         <p>Note: You can get one for free <a target="_blank" href="https://ai.google.dev/gemini-api/docs/api-key?hl=es-419">here</a></p>
         <label for="api_key_stable_diffusion">
-            <h3>Stable Diffusion API Key:</h3>
+            <h3>Stable Diffusion API Key: (For featured image attached to posts)</h3>
         </label>
         <input type="password" id="api_key_stable_diffusion" name="api_key_stable_diffusion" value="<?php echo esc_attr($api_key_stable_diffusion); ?>" required><br>
         <p>Note: You can get one for free <a target="_blank" href="https://stability.ai/">here</a></p>
@@ -34,14 +35,15 @@
             For more information <a target="_blank" href="https://gemini.google.com/advanced?utm_source=google&utm_medium=cpc&utm_campaign=sem_lp_sl&gad_source=1&gclid=CjwKCAjwqMO0BhA8EiwAFTLgII3-Yyyf4-LZHwQgJNtl7-LAGz9OmcyBNtUVowaQXhznCYZx3qlGCxoCyvUQAvD_BwE">click here</a></p>
         <?php foreach ($errors as $error): ?>
             <p style="color: red;">1 post create failed due to: <?php echo esc_html($error); ?></p>
-        <?php endforeach; ?>
-    <?php endif; ?>
+        <?php endforeach;?>
+    <?php endif;?>
 
     <?php if (!empty($responses)): ?>
         <h3>Posts Created by GEMINI's API Call:</h3>
         <?php foreach ($responses as $response): ?>
-            <pre><a href="<?php echo get_post_permalink($response->ID); ?>" target="_blank"><?php echo get_the_title($response->ID); ?></a></pre>
-        <?php endforeach; ?>
-    <?php endif; ?>
+            <pre><a href="<?php echo esc_html(get_post_permalink($response->ID)); ($response->ID); ?>" target="_blank"><?php echo esc_html(get_the_title($response->ID)); ?></a></pre>
+        <?php endforeach;?>
+    <?php endif;?>
     <p style="color: red;"><b>DISCLAIMER: this is a work in progress. The quantity of posts created by this plugin depends on your API key limitations</b></p>
+    <p><a target="_blank" href="https://github.com/berchj/AIEntries">mantain and scale this plugin</a></p>
 </div>

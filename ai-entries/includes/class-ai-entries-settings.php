@@ -1,8 +1,10 @@
 <?php
 
-class AIEntries_Settings {
+class AIEntries_Settings
+{
 
-    public static function add_menu_page() {
+    public static function add_menu_page()
+    {
         add_menu_page(
             'AIEntries Settings',
             'AIEntries',
@@ -12,7 +14,18 @@ class AIEntries_Settings {
         );
     }
 
-    public static function settings_page() {
+    public static function settings_page()
+    {
+        if (isset($_POST['submit'])) {
+            // Verificar el nonce
+            if (isset($_POST['aic_entries_nonce']) && wp_verify_nonce($_POST['aic_entries_nonce'], 'aic_entries_settings_nonce')) {
+                // Procesar los datos del formulario
+                // Código de procesamiento existente aquí
+            } else {
+                // Si el nonce no es válido, muestra un mensaje de error o realiza alguna acción
+                echo 'Nonce verification failed. Please try again.';
+            }
+        }
         if (isset($_POST['submit'])) {
             update_option('AIEntries_question', sanitize_text_field($_POST['question']));
             update_option('AIEntries_num_calls', intval($_POST['num_calls']));

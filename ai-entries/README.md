@@ -1,24 +1,41 @@
-### Clase Principal (AIEntries): 
+=== AI Entries ===
+
+Contributors:      Julio Bermúdez
+Tested up to:      6.5.5
+Stable tag:        1.0.3
+License:           GPLv2 or later
+License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+Tags:              plugin best practices, accessibility, performance, security, automation
+
+This plugin uses Google artificial intelligence (GEMINI) and stability ai.
 
 
-Esta clase se utiliza para inicializar el plugin, establecer ganchos (hooks) y gestionar la activación y desactivación del plugin (para planificar/desprogramar la tarea cron).
+== Description ==
 
-### Clase de Configuración (AIEntries_Settings): 
+You need to have a GEMINI API KEY to use this plugin. 
+
+You can get one for free here : https://ai.google.dev/gemini-api/docs/api-key
+
+You need to have a stability.ai API KEY to use this plugin. 
+
+You can get one for free here : https://platform.stability.ai/
+
+== Installation ==
+
+= Installation from within WordPress =
+
+1. Visit **Plugins > Add New**.
+2. Search for **Plugin Check**.
+3. Install and activate the Plugin.
+
+== Frequently Asked Questions ==
+
+= Where can I contribute to the plugin? =
+
+All development for this plugin is handled via [GitHub](https://github.com/berchj/AIEntries) any issues or pull requests should be posted there.
 
 
-Esta clase maneja la creación de la página de configuración en el área de administración de WordPress.
+= Why aren't all posts always created? =
 
-### Clase de API (AIEntries_API): 
+The functionality of this plugin depends on external systems which we use through http calls, the API keys that you get for free could also affect the performance of the plugin.
 
-
-Esta clase maneja todas las llamadas a las APIs externas y la creación de entradas en WordPress, incluyendo la generación de imágenes y la gestión de archivos base64.
-
-### Clase de Cron (AIEntries_Cron): 
-
-
-Esta clase se encarga de las tareas programadas, ejecutando una función en un intervalo diario para crear nuevas publicaciones basadas en la configuración proporcionada.
-
-### Página de Configuración (settings-page.php): 
-
-
-Este archivo contiene el HTML necesario para la página de configuración del plugin en el área de administración de WordPress.
