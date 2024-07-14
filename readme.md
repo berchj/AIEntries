@@ -1,18 +1,24 @@
 
 # AIEntries Plugin
 
-This plugin uses Google's artificial intelligence (GEMINI) to automate the creation of WordPress Posts based on configurable parameters from the WordPress administrator view.
+This plugin uses Google artificial intelligence (GEMINI) and stability.AI to automate the creation of standard WordPress posts based on configurable parameters from the WordPress admin view.
 
 
 ## Requirements 
 
 You need to have a GEMINI API KEY to use this plugin. 
 
-You can get one for free here : https://ai.google.dev/gemini-api/docs/api-key?hl=es-419
+You can get one for free here : https://ai.google.dev/gemini-api/docs/api-key
+
+You need to have a stability.ai API KEY to use this plugin. 
+
+You can get one for free here : https://platform.stability.ai/
 
 ## Run this project locally
 
-You need to have installed first: 
+### pre-installs
+
+You need to have installed first (we recomend run thi project in a linux debian based distribution): 
 
 * nodejs
 * npm
@@ -36,6 +42,8 @@ Install dependencies
 ```bash
   npm i
 ```
+
+### environment commands 
 
 Start local environment
 
@@ -67,15 +75,24 @@ Make .zip to upload to wordpress
   make zip
 ```
 
+### About wordpress/env : 
+
+https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/
 
 
-## Features
+### npm package (installed as dependency in this project):
 
-* Input to ask you what topic to create the post on
+https://www.npmjs.com/package/@wordpress/env
+
+## Form Features
+
+* Input to ask you what topic to create the posts 
 * Input to ask how many Posts to create
-* Input to store the api key
-* Input to store the category that will be added to the posts
-* The plugin runs as a daily task
+* Input to store google's gemini api key
+* Input to store stability ai api key
+* Input to store the category that will be added to the posts (creates if no exists)
+* Generation of featured image based on post's title and attach to post. 
+* The plugin runs as a daily cron wordpress task 
 ## Support
 
 For support, email info@glidestay.com .

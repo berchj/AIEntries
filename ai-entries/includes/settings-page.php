@@ -1,6 +1,5 @@
 <div class="wrap">
-    <h2>AIEntries Settings</h2>
-    <p>The api call returns jsons using this JSON schema : <code>{'title': str,'content':str}</code> to automate the creation of WordPress posts</p>
+    <h2>AIEntries Settings</h2>    
     <p>This plugin runs once a day according to the following parameters:</p>
 
     <form method="post" action="">

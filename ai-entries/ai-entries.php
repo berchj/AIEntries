@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name:       IA Entries
- * Description:       Automates the creation of WordPress site entries based on an AI API call to Google's GEMINI
- * Version:           1.1.0
+ * Description:       Automates the creation of standard WordPress posts, using Google Gemini artificial intelligence (SEO-friendly titles and content) and AI stability (images associated with posts).
+ * Version:           1.0.3
  * Requires at least: 5.2
  * Requires PHP:      7.2
- * Author:            Julio Bermúdez
+ * Author:            GPLv2 or later.
  * Author URI:        https://github.com/berchj/
  * Plugin URI:        https://github.com/berchj/AIEntries
  * License:           MIT
