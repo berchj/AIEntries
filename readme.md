@@ -3,6 +3,7 @@
 
 This plugin uses Google artificial intelligence (GEMINI) and stability.AI to automate the creation of standard WordPress posts based on configurable parameters from the WordPress admin view.
 
+# Getting started!
 
 ## Requirements 
 
@@ -37,15 +38,22 @@ Go to the project directory
   cd AIEntries
 ```
 
+### environment commands 
+
 Install dependencies
 
 ```bash
   npm i
 ```
 
-### environment commands 
+Start local environment (this install all dependencies including wordpress and composer /phpunit for unit tests)
 
-Start local environment
+```bash
+  make start
+```
+
+
+Run all unit test in ai-entries/tests directory (see makefile to the entire command config)
 
 ```bash
   make test
@@ -75,6 +83,12 @@ Make .zip to upload to wordpress
   make zip
 ```
 
+### Unit tests 
+
+This project is configured to accept unit tests written in the ai-entries/tests directory
+
+To know more about how phpunit works: https://phpunit.de/manual/6.5/en/textui.html
+
 ### About wordpress/env : 
 
 https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/
@@ -84,15 +98,7 @@ https://developer.wordpress.org/block-editor/reference-guides/packages/packages-
 
 https://www.npmjs.com/package/@wordpress/env
 
-## Form Features
 
-* Input to ask you what topic to create the posts 
-* Input to ask how many Posts to create
-* Input to store google's gemini api key
-* Input to store stability ai api key
-* Input to store the category that will be added to the posts (creates if no exists)
-* Generation of featured image based on post's title and attach to post. 
-* The plugin runs as a daily cron wordpress task 
 ## Support
 
 For support, email info@glidestay.com .
