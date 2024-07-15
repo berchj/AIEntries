@@ -18,8 +18,11 @@ jobs:
     
     - uses: actions/checkout@v4
 
-    - name: Ente directory project
-      run: ls -l
+    - name: Start Project
+      run: make start
+      
+    - name: Run Tests
+      run: make test
     
     #- name: Install dependencies 
     #  run: npm i
