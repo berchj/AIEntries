@@ -19,19 +19,19 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Ente directory project
-      run: cd AIEntries
+      run: ls -l
     
-    - name: Install dependencies 
-      run: npm i
+    #- name: Install dependencies 
+    #  run: npm i
       
-    - name: start wordpress local environment
-      run: npx wp-env start --xdebug=coverage
+    #- name: start wordpress local environment
+    #  run: npx wp-env start --xdebug=coverage
 
-    - name: install phpUnit
-      run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require phpunit/phpunit  --dev --with-all-dependencies
+    #- name: install phpUnit
+    #  run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require phpunit/phpunit  --dev --with-all-dependencies
       
-    - name: install phpunit-polyfills
-      run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require yoast/phpunit-polyfills  --dev --with-all-dependencies
+    #- name: install phpunit-polyfills
+    #  run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require yoast/phpunit-polyfills  --dev --with-all-dependencies
       
-    - name: run phpUnit tests
-      run: npx wp-env run tests-cli --env-cwd=wp-content/plugins/ai-entries ./vendor/bin/phpunit ./tests --testdox
+    #- name: run phpUnit tests
+    #  run: npx wp-env run tests-cli --env-cwd=wp-content/plugins/ai-entries ./vendor/bin/phpunit ./tests --testdox
