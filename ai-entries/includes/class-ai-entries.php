@@ -9,6 +9,10 @@ class AIEntries {
         $this->init_hooks();
     }
 
+    public static function createInstance() {
+        return new self();
+    }
+
     public static function instance() {
         if (is_null(self::$instance)) {
             self::$instance = new self();

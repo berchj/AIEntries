@@ -1,4 +1,6 @@
 node_modules
 package-lock.json
+ai-entries/vendor/
+composer.*
 *.txt
 *.zip
