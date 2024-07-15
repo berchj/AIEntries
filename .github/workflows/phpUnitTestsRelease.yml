@@ -17,9 +17,12 @@ jobs:
     steps:
     
     - uses: actions/checkout@v4
+<<<<<<< HEAD
 
     - name: Ente directory project
       run: cd AIEntries
+=======
+>>>>>>> 7578bfcdf9f536d4eebd01cdcbffcfebcbc97685
     
     - name: Install dependencies 
       run: npm i
