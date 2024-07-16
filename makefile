@@ -10,7 +10,7 @@ start:
 	npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require yoast/phpunit-polyfills  --dev --with-all-dependencies
 # Tests
 test:				
-	npx wp-env run tests-cli --env-cwd=wp-content/plugins/ai-entries ./vendor/bin/phpunit ./tests --testdox 
+	npx wp-env run tests-cli --env-cwd=wp-content/plugins/ai-entries ./vendor/bin/phpunit ./tests/classes --testdox 
 	
 # Clean all environments
 clear:
