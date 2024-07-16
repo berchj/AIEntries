@@ -3,6 +3,11 @@
 
 This plugin uses Google artificial intelligence (GEMINI) and stability.AI to automate the creation of standard WordPress posts based on configurable parameters from the WordPress admin view.
 
+![image](https://github.com/user-attachments/assets/f01bf1a9-a2b9-4bfd-9995-2756219be659)
+
+![image](https://github.com/user-attachments/assets/81b1e192-83a7-40f1-b856-b4f33f007f1c)
+
+
 # Getting started!
 
 ## Requirements 

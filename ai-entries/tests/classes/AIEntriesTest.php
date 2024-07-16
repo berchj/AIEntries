@@ -1,56 +1,16 @@
 <?php
 
-require_once dirname(__DIR__) . '/includes/class-ai-entries.php';
+require_once dirname(__DIR__) . '/BaseTest.php';
 
-if (!function_exists('plugin_dir_path')) {
-    function plugin_dir_path($file)
-    {
-        return trailingslashit(dirname($file));
-    }
-}
-
-if (!function_exists('trailingslashit')) {
-    function trailingslashit($string)
-    {
-        return rtrim($string, '/') . '/';
-    }
-}
-
-if (!function_exists('add_action')) {
-    function add_action($hook, $callback, $priority = 10, $args = 1)
-    {
-       
-        return "Added action: $hook\n";
-    }
-}
-
-if (!function_exists('add_shortcode')) {
-    function add_shortcode($tag, $callback)
-    {
-        
-        return "Added shortcode: [$tag]\n"; // Example mock behavior
-    }
-}
-
-if (!function_exists('has_action')) {
-    function has_action($hook_name, $callback = false) {
-        
-        return true; 
-    }
-}
-
-if (!function_exists('has_shortcode')) {
-    function has_shortcode($content, $tag = '') {
-       
-        return true; 
-    }
-}
-
+require_once __DIR__ . '/../../includes/class-ai-entries-settings.php';
+require_once __DIR__ . '/../../includes/class-ai-entries-api.php';
+require_once __DIR__ . '/../../includes/class-ai-entries-cron.php';
+require_once __DIR__ . '/../../includes/class-ai-entries.php';
 
 
 use PHPUnit\Framework\TestCase;
 
-class AIEntriesTest extends TestCase
+class AIEntriesTest extends BaseTest
 {
     /**
      *  @covers AIEntries::createInstance
@@ -78,9 +38,9 @@ class AIEntriesTest extends TestCase
         $this->expectOutputString('');
 
         $instance = AIEntries::createInstance();
-
-        $this->assertFileExists(plugin_dir_path(__DIR__) . 'includes/class-ai-entries-settings.php');
-        $this->assertFileExists(plugin_dir_path(__DIR__) . 'includes/class-ai-entries-api.php');
+        
+        $this->assertFileExists(dirname(plugin_dir_path(__DIR__)) . '/includes/class-ai-entries-settings.php');
+        $this->assertFileExists(dirname(plugin_dir_path(__DIR__)) . '/includes/class-ai-entries-api.php');
     }
     /**
      * @covers AIEntries::init_hooks
