@@ -98,6 +98,8 @@ To know more about how phpunit works: https://phpunit.de/manual/6.5/en/textui.ht
 
 https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/
 
+### About WP_Mock : https://wp-mock.gitbook.io/documentation
+
 
 ### npm package (installed as dependency in this project):
 
