@@ -88,7 +88,7 @@ Make .zip to upload to wordpress
   make zip
 ```
 
-### Unit tests  💊 📄
+## Unit tests  💊 📄
 
 This project is configured to accept unit tests written in the ai-entries/tests directory
 
