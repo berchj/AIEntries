@@ -88,7 +88,21 @@ Make .zip to upload to wordpress
   make zip
 ```
 
-### Unit tests  💊 📄
+# Docker issues  🐳 : 
+
+Remove containers (Docker)
+
+```bash
+  docker rm -f $(docker ps -a -q)
+```
+
+Remove images (Docker)
+
+```bash
+  docker rmi -f $(docker images -q)
+```
+
+# Unit tests  💊 📄
 
 This project is configured to accept unit tests written in the ai-entries/tests directory
 
@@ -98,6 +112,9 @@ To know more about how phpunit works: https://phpunit.de/manual/6.5/en/textui.ht
 
 https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/
 
+### About WP_Mock : 
+
+https://wp-mock.gitbook.io/documentation
 
 ### npm package (installed as dependency in this project):
 

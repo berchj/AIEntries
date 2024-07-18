@@ -1,7 +1,9 @@
+<?php
+require_once dirname(__FILE__) . '/class-ai-entries-cron.php';
+?>
 <div class="wrap">
     <h2>AIEntries Settings</h2>
-    <p>This plugin runs once a day according to the following parameters:</p>
-
+    <p>This plugin runs once a day according to the following parameters:</p>   
     <form method="post" action="">
     <?php wp_nonce_field('aic_entries_settings_nonce', 'aic_entries_nonce');?>
         <label for="question">
