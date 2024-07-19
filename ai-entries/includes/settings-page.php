@@ -57,6 +57,6 @@ require_once dirname(__FILE__) . '/class-ai-entries-cron.php';
     <p><a target="_blank" href="https://github.com/berchj/AIEntries">mantain and scale this plugin</a></p>
     <h3>Wordpress Cron tasks scheduled by this plugin:</h3>
     <?php
-        echo esc_html(AIEntries_Cron::show_all_cron_tasks());
+        AIEntries_Cron::show_all_cron_tasks();
     ?>
 </div>
