@@ -8,9 +8,9 @@ This plugin uses Google artificial intelligence (GEMINI) and stability.AI to aut
 ![image](https://github.com/user-attachments/assets/81b1e192-83a7-40f1-b856-b4f33f007f1c)
 
 
-# Getting started!
+# Getting started!  💥   🚀
 
-## Requirements 
+## Requirements  ✅
 
 You need to have a GEMINI API KEY to use this plugin. 
 
@@ -20,9 +20,9 @@ You need to have a stability.ai API KEY to use this plugin.
 
 You can get one for free here : https://platform.stability.ai/
 
-## Run this project locally
+## Run this project locally  💻  💻
 
-### pre-installs
+### pre-installs 
 
 You need to have installed first (we recomend run thi project in a linux debian based distribution): 
 
@@ -88,7 +88,21 @@ Make .zip to upload to wordpress
   make zip
 ```
 
-### Unit tests 
+# Docker issues  🐳 : 
+
+Remove containers (Docker)
+
+```bash
+  docker rm -f $(docker ps -a -q)
+```
+
+Remove images (Docker)
+
+```bash
+  docker rmi -f $(docker images -q)
+```
+
+# Unit tests  💊 📄
 
 This project is configured to accept unit tests written in the ai-entries/tests directory
 
@@ -98,12 +112,15 @@ To know more about how phpunit works: https://phpunit.de/manual/6.5/en/textui.ht
 
 https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/
 
+### About WP_Mock : 
+
+https://wp-mock.gitbook.io/documentation
 
 ### npm package (installed as dependency in this project):
 
 https://www.npmjs.com/package/@wordpress/env
 
 
-## Support
+## Support 📞 📬
 
 For support, email info@glidestay.com .

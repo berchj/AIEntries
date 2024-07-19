@@ -29,6 +29,9 @@ jobs:
       
     - name: install phpunit-polyfills
       run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require yoast/phpunit-polyfills  --dev --with-all-dependencies
+    
+    - name : install wp_mock
+      run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require 10up/wp_mock --dev --with-all-dependencies
       
     - name: run phpUnit tests
-      run: npx wp-env run tests-cli --env-cwd=wp-content/plugins/ai-entries ./vendor/bin/phpunit ./tests/classes --testdox
+      run: npx wp-env run tests-cli --env-cwd=wp-content/plugins/ai-entries ./vendor/bin/phpunit ./tests/classes --bootstrap ./tests/bootstrap.php --testdox --colors

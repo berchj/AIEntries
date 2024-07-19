@@ -1,8 +1,10 @@
 <?php
 
-class AIEntries_API {
+class AIEntries_API
+{
 
-    public static function call($question, $api_key, $category_name, $iterator = "") {
+    public static function call($question, $api_key, $category_name, $iterator = "")
+    {
         // URL for the API call
         $url = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' . $api_key;
 
@@ -58,7 +60,8 @@ class AIEntries_API {
         return self::create_new_entry($article['title'], $article['content'], $category_name);
     }
 
-    private static function create_new_entry($title, $content, $category_name) {
+    private static function create_new_entry($title, $content, $category_name)
+    {
         if (current_user_can('publish_posts')) {
             $category_id = get_term_by('name', $category_name, 'category');
             if (!$category_id) {
@@ -85,13 +88,19 @@ class AIEntries_API {
             } else {
                 $base64_image = self::generate_post_image_with_AI($title);
                 self::set_featured_image_from_base64($base64_image, $post_id);
+
+                wp_clear_scheduled_hook('AIEntries_daily_cron_job');
+
+                wp_schedule_event(strtotime('now') + (1 * 60 * 60) , 'hourly', 'AIEntries_daily_cron_job');
+
                 return get_post($post_id);
             }
         }
         return new WP_Error('permission_error', 'You do not have permission to publish posts.');
     }
 
-    private static function generate_post_image_with_AI($title) {
+    private static function generate_post_image_with_AI($title)
+    {
         $base_url = 'https://api.stability.ai';
         $url = "$base_url/v1/generation/stable-diffusion-v1-6/text-to-image";
         $api_key_stable_diffusion = get_option('AIEntries_api_key_stable_diffusion', '');
@@ -124,49 +133,50 @@ class AIEntries_API {
         return $body_request['artifacts'][0]['base64'];
     }
 
-    private static function set_featured_image_from_base64($base64_image, $post_id) {
+    private static function set_featured_image_from_base64($base64_image, $post_id)
+    {
         if (!is_int($post_id)) {
             return false;
         }
-    
+
         // Inicializar WP_Filesystem
         WP_Filesystem();
-        
+
         global $wp_filesystem;
-        
+
         $upload_dir = wp_upload_dir();
         $file_path = $upload_dir['path'] . '/' . uniqid() . '.jpg';
-    
+
         // Usar WP_Filesystem para escribir el contenido en el archivo
         if (!$wp_filesystem->put_contents($file_path, base64_decode($base64_image), FS_CHMOD_FILE)) {
             return false;
         }
-    
+
         $mime_type = mime_content_type($file_path);
-    
+
         if (strpos($mime_type, 'image') === false) {
             return false;
         }
-    
+
         $filetype = wp_check_filetype(basename($file_path), null);
-        
+
         $attachment = array(
             'guid' => $upload_dir['url'] . '/' . basename($file_path),
             'post_mime_type' => $filetype['type'],
             'post_title' => sanitize_file_name(basename($file_path)),
             'post_content' => '',
-            'post_status' => 'inherit'
+            'post_status' => 'inherit',
         );
-    
+
         $attach_id = wp_insert_attachment($attachment, $file_path, $post_id);
-        
+
         require_once ABSPATH . 'wp-admin/includes/image.php';
-        
+
         $attach_data = wp_generate_attachment_metadata($attach_id, $file_path);
         wp_update_attachment_metadata($attach_id, $attach_data);
         set_post_thumbnail($post_id, $attach_id);
-    
+
         return true;
     }
-    
+
 }

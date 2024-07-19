@@ -12,6 +12,7 @@ class AIEntries_Settings
             'AIEntries-settings',
             [self::class, 'settings_page']
         );
+        return true;
     }
 
     public static function settings_page()
