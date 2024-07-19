@@ -33,8 +33,7 @@ class AIEntries
 
     private function init_hooks()
     {
-        add_action('admin_menu', ['AIEntries_Settings', 'add_menu_page']);
-        add_action('wp', ['AIEntries_Cron', 'check_six_hour_function']);      
+        add_action('admin_menu', ['AIEntries_Settings', 'add_menu_page']);            
         add_action('AIEntries_daily_cron_job', ['AIEntries_Cron', 'daily_task']);        
     }
 
