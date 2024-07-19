@@ -30,6 +30,7 @@ class AIEntries_Settings
         if (isset($_POST['submit'])) {
             update_option('AIEntries_question', sanitize_text_field($_POST['question']));
             update_option('AIEntries_num_calls', intval($_POST['num_calls']));
+            update_option('AIEntries_news_api_key', sanitize_text_field($_POST['news_api_key']));
             update_option('AIEntries_api_key', sanitize_text_field($_POST['api_key']));
             update_option('AIEntries_category', sanitize_text_field($_POST['category']));
             update_option('AIEntries_api_key_stable_diffusion', sanitize_text_field($_POST['api_key_stable_diffusion']));
@@ -52,7 +53,8 @@ class AIEntries_Settings
         $question = get_option('AIEntries_question', '');
         $num_calls = get_option('AIEntries_num_calls', 1);
         $api_key = get_option('AIEntries_api_key', '');
-        $category = get_option('AIEntries_category', '');
+        $news_api_key = get_option('AIEntries_news_api_key','');
+        $category = get_option('AIEntries_category', '');        
         $api_key_stable_diffusion = get_option('AIEntries_api_key_stable_diffusion', '');
 
         include plugin_dir_path(__FILE__) . 'settings-page.php';

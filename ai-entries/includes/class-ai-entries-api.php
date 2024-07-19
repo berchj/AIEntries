@@ -2,6 +2,32 @@
 
 class AIEntries_API
 {
+    public function fetch_news()
+    {
+        $api_base_url = 'https://newsapi.org/v2/everything';
+        $api_key = 'ec81de69de28413bbff755cca38940e5';
+        // Construir la URL completa con los parámetros
+        $url = add_query_arg(array(
+            'q' => get_option('AIEntries_question', ''),
+            'apiKey' => $this->api_key,
+        ), $this->api_base_url);
+
+        // Realizar la solicitud GET utilizando wp_remote_get
+        $response = wp_remote_get($url);
+
+        // Verificar si la solicitud fue exitosa
+        if (is_wp_error($response)) {
+            return "Error: " . $response->get_error_message();
+        }
+
+        $body = wp_remote_retrieve_body($response);
+
+        // Decodificar el cuerpo de la respuesta JSON
+        $data = json_decode($body, true);
+
+        // Devolver los datos decodificados
+        return $data;
+    }
 
     public static function call($question, $api_key, $category_name, $iterator = "")
     {
@@ -91,7 +117,7 @@ class AIEntries_API
 
                 wp_clear_scheduled_hook('AIEntries_daily_cron_job');
 
-                wp_schedule_event(strtotime('now') + (1 * 60 * 60) , 'hourly', 'AIEntries_daily_cron_job');
+                wp_schedule_event(strtotime('now') + (1 * 60 * 60), 'hourly', 'AIEntries_daily_cron_job');
 
                 return get_post($post_id);
             }

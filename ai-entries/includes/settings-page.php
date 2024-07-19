@@ -16,6 +16,11 @@ require_once dirname(__FILE__) . '/class-ai-entries-cron.php';
             <h3>Number of posts created based on GEMINI API Call (we recommend 5 because possible errors calling the API):</h3>
         </label>
         <input type="number" id="num_calls" name="num_calls" min="1" max="5" value="<?php echo intval($num_calls); ?>" required><br>
+        <label for="news_api_key">
+            <h3>NEWSAPI API Key: (to generate high quality content)</h3>
+        </label>
+        <input type="password" id="news_api_key" name="news_api_key" value="<?php echo esc_attr($news_api_key); ?>" required><br>
+        <p>Note: You can get one for free <a target="_blank" href="https://newsapi.org/">here</a></p>
         <label for="api_key">
             <h3>GEMINI API Key:</h3>
         </label>
