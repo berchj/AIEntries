@@ -3,7 +3,9 @@ require_once dirname(__FILE__) . '/class-ai-entries-cron.php';
 ?>
 <div class="wrap">
     <h2>AIEntries Settings</h2>
-    <p>This plugin runs once a day according to the following parameters:</p>   
+   
+    
+    <p>This plugin runs once a day according to the following parameters:</p>
     <form method="post" action="">
     <?php wp_nonce_field('aic_entries_settings_nonce', 'aic_entries_nonce');?>
         <label for="question">
@@ -45,7 +47,11 @@ require_once dirname(__FILE__) . '/class-ai-entries-cron.php';
         <?php foreach ($responses as $response): ?>
             <pre><a href="<?php echo esc_html(get_post_permalink($response->ID)); ($response->ID); ?>" target="_blank"><?php echo esc_html(get_the_title($response->ID)); ?></a></pre>
         <?php endforeach;?>
-    <?php endif;?>
+    <?php endif;?>    
     <p style="color: red;"><b>DISCLAIMER: this is a work in progress. The quantity of posts created by this plugin depends on your API key limitations</b></p>
     <p><a target="_blank" href="https://github.com/berchj/AIEntries">mantain and scale this plugin</a></p>
+    <h3>Wordpress Cron tasks scheduled by this plugin:</h3>
+    <?php
+        echo esc_html(AIEntries_Cron::show_all_cron_tasks());
+    ?>
 </div>

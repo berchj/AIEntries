@@ -2,13 +2,11 @@
 
 
 require_once __DIR__ . '/../../includes/class-ai-entries-settings.php';
-require_once __DIR__ . '/../../includes/class-ai-entries-api.php';
-require_once __DIR__ . '/../../includes/class-ai-entries-cron.php';
-require_once __DIR__ . '/../../includes/class-ai-entries.php';
+
 
    
 
-class AiEntriesSettingsTest extends WP_Mock\Tools\TestCase
+class AIEntriesSettingsTest extends WP_Mock\Tools\TestCase
 {   
     
     
@@ -38,6 +36,7 @@ class AiEntriesSettingsTest extends WP_Mock\Tools\TestCase
         WP_Mock::userFunction('wp_nonce_field');
         WP_Mock::userFunction('wp_nonce_field');
         WP_Mock::userFunction('get_option');
+        WP_Mock::userFunction('_get_cron_array');
         // Mock POST request with no submit
         $_POST = [];
         ob_start();
@@ -55,7 +54,8 @@ class AiEntriesSettingsTest extends WP_Mock\Tools\TestCase
         WP_Mock::userFunction('wp_remote_retrieve_body');      
         Mockery::mock('WP_Error');
         WP_Mock::userFunction('get_post_permalink');      
-        WP_Mock::userFunction('get_the_title');   
+        WP_Mock::userFunction('get_the_title'); 
+        WP_Mock::userFunction('_get_cron_array');
         // Mock POST request with submit
         $_POST = [
             'submit' => true,

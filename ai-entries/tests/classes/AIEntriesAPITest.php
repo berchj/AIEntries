@@ -25,16 +25,16 @@ class AIEntriesAPITest extends WP_Mock\Tools\TestCase
         Mockery::mock('WP_Error');
         // Set up the mocked functions and their return values
         
-        
+        WP_Mock::userFunction('wp_json_encode');
 
         WP_Mock::userFunction('wp_remote_retrieve_body', [
-            'return' => json_encode([
+            'return' => wp_json_encode([
                 'candidates' => [
                     [
                         'content' => [
                             'parts' => [
                                 [
-                                    'text' => json_encode([
+                                    'text' => wp_json_encode([
                                         'title' => 'Test Title',
                                         'content' => '<p>Test Content</p>',
                                     ]),

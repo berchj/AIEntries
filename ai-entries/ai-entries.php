@@ -15,7 +15,6 @@ defined('ABSPATH') || exit;
 
 require_once plugin_dir_path(__FILE__) . 'includes/class-ai-entries.php';
 
-register_activation_hook(__FILE__, ['AIEntries', 'activate']);
 register_deactivation_hook(__FILE__, ['AIEntries', 'deactivate']);
 
 AIEntries::instance();

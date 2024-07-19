@@ -34,15 +34,8 @@ class AIEntries
     private function init_hooks()
     {
         add_action('admin_menu', ['AIEntries_Settings', 'add_menu_page']);
-        add_action('AIEntries_daily_cron_job', ['AIEntries_Cron', 'daily_task']);
-        add_action('admin_notices', ['AIEntries_Cron', 'show_next_scheduled_cron']);
-    }
-
-    public static function activate()
-    {
-        if (!wp_next_scheduled('AIEntries_daily_cron_job')) {
-            wp_schedule_event(time(), 'hourly', 'AIEntries_daily_cron_job');
-        }
+        add_action('wp', ['AIEntries_Cron', 'check_six_hour_function']);      
+        add_action('AIEntries_daily_cron_job', ['AIEntries_Cron', 'daily_task']);        
     }
 
     public static function deactivate()
