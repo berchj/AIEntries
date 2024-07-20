@@ -29,17 +29,18 @@ https://stability.ai/
 
 ### DISCLAIMER : THIS IS AN IN PROGRESS PROJECT .
 
+![Politics](https://github.com/user-attachments/assets/a2685618-be5f-4cc2-aec6-b96636914aae)
 
-![politic](<Captura de pantalla de 2024-07-20 16-59-02.png>)
+![Travels](https://github.com/user-attachments/assets/00aa2883-488f-4057-a05d-f6e464fe51de)
+
+![Misteries](https://github.com/user-attachments/assets/70c06b1c-1d35-40cb-839f-9aee4e2c249d)
+
+![Any theme](https://github.com/user-attachments/assets/2e0e0e7d-03ad-4c82-a26c-5579fcca4fac)
+
+![admin view](https://github.com/user-attachments/assets/7d7b8f00-fe92-41e3-b86b-b1259ffbe519)
 
 
-![travel tips](<Captura de pantalla de 2024-07-20 16-59-53.png>)
 
-
-![bitcoin](<Captura de pantalla de 2024-07-20 17-47-03.png>)
-
-
-![UFO](<Captura de pantalla de 2024-07-20 18-01-57.png>)
 
 # Getting started!  💥   🚀
 
