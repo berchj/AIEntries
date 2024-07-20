@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__FILE__) . '/class-ai-entries-cron.php';
+require_once dirname(__FILE__) . '/class-ai-entries-api.php';
 ?>
 <div class="wrap">
     <h2>AIEntries Settings</h2>
@@ -15,7 +16,7 @@ require_once dirname(__FILE__) . '/class-ai-entries-cron.php';
         <label for="num_calls">
             <h3>Number of posts created based on GEMINI API Call (we recommend 5 because possible errors calling the API):</h3>
         </label>
-        <input type="number" id="num_calls" name="num_calls" min="1" max="5" value="<?php echo intval($num_calls); ?>" required><br>
+        <input type="number" id="num_calls" name="num_calls" min="1" max="20" value="<?php echo intval($num_calls); ?>" required><br>
         <label for="news_api_key">
             <h3>NEWSAPI API Key: (to generate high quality content)</h3>
         </label>
@@ -47,9 +48,9 @@ require_once dirname(__FILE__) . '/class-ai-entries-cron.php';
         <?php endforeach;?>
     <?php endif;?>
 
-    <?php if (!empty($responses)): ?>
+    <?php if (!empty(AIEntries_API::$responses )): ?>
         <h3>Posts Created by GEMINI's API Call:</h3>
-        <?php foreach ($responses as $response): ?>
+        <?php foreach (AIEntries_API::$responses as $response): ?>
             <pre><a href="<?php echo esc_html(get_post_permalink($response->ID)); ($response->ID); ?>" target="_blank"><?php echo esc_html(get_the_title($response->ID)); ?></a></pre>
         <?php endforeach;?>
     <?php endif;?>    

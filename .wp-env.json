@@ -1,4 +1,6 @@
 {
   "plugins": ["./ai-entries/"],
-  "phpVersion": "7.4"
+  "phpVersion": "7.4",
+  "core": "WordPress/WordPress#master"
+
 }

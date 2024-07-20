@@ -37,14 +37,14 @@ class AIEntries_Settings
 
             $responses = [];
             $errors = [];
-            for ($i = 0; $i < intval($_POST['num_calls']); $i++) {
-                $response = AIEntries_API::call($_POST['question'], $_POST['api_key'], $_POST['category'], $i > 0 ? '' : 'more distinct');
-                if (!is_wp_error($response)) {
-                    $responses[] = $response;
-                } else {
-                    $errors[] = $response->get_error_message();
-                }
+
+            $response = AIEntries_API::call($_POST['question'], $_POST['api_key'], $_POST['category']);
+            if (!is_wp_error($response)) {
+                $responses[] = $response;
+            } else {
+                $errors[] = $response->get_error_message();
             }
+
         } else {
             $responses = [];
             $errors = [];
@@ -53,8 +53,8 @@ class AIEntries_Settings
         $question = get_option('AIEntries_question', '');
         $num_calls = get_option('AIEntries_num_calls', 1);
         $api_key = get_option('AIEntries_api_key', '');
-        $news_api_key = get_option('AIEntries_news_api_key','');
-        $category = get_option('AIEntries_category', '');        
+        $news_api_key = get_option('AIEntries_news_api_key', '');
+        $category = get_option('AIEntries_category', '');
         $api_key_stable_diffusion = get_option('AIEntries_api_key_stable_diffusion', '');
 
         include plugin_dir_path(__FILE__) . 'settings-page.php';
