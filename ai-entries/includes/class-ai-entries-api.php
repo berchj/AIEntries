@@ -12,7 +12,6 @@ class AIEntries_API
             'q' => get_option('AIEntries_question', ''),
             'apiKey' => get_option('AIEntries_news_api_key', ''),
             'pageSize' => get_option('AIEntries_num_calls', 1),
-            'lenguage' => 'en',
         ), $api_base_url);
 
         // Realizar la solicitud GET utilizando wp_remote_get

@@ -1,6 +1,8 @@
 {
-  "plugins": ["./ai-entries/"],
+  "plugins": [
+    "./ai-entries/",
+    "https://downloads.wordpress.org/plugin/plugin-check.zip"
+  ],
   "phpVersion": "7.4",
-  "core": "WordPress/WordPress#master"
-
+  "core": null
 }

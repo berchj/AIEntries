@@ -10,7 +10,8 @@ class AIEntries_Settings
             'AIEntries',
             'manage_options',
             'AIEntries-settings',
-            [self::class, 'settings_page']
+            [self::class, 'settings_page'],
+            'dashicons-visibility'
         );
         return true;
     }
