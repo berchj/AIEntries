@@ -27,6 +27,10 @@ We use this api to generate post's featured imaged based on ai generated article
 https://stability.ai/
 
 
+### this plugin uses PLUGIN CHECK in each release : 
+
+https://wordpress.org/plugins/plugin-check/
+
 ### DISCLAIMER : THIS IS AN IN PROGRESS PROJECT .
 
 ![Politics](https://github.com/user-attachments/assets/a2685618-be5f-4cc2-aec6-b96636914aae)
