@@ -48,18 +48,41 @@ class AIEntriesSettingsTest extends WP_Mock\Tools\TestCase
     public function testSettingsPageSubmit()
     {
         WP_Mock::userFunction('sanitize_text_field');
-        WP_Mock::userFunction('wp_json_encode');
-        WP_Mock::userFunction('wp_remote_post');
-        WP_Mock::userFunction('is_wp_error');
-        WP_Mock::userFunction('wp_remote_retrieve_body');      
+        WP_Mock::userFunction('wp_json_encode');        
+        WP_Mock::userFunction('is_wp_error');             
         Mockery::mock('WP_Error');
         WP_Mock::userFunction('get_post_permalink');      
         WP_Mock::userFunction('get_the_title'); 
         WP_Mock::userFunction('_get_cron_array');
+        WP_Mock::userFunction('add_query_arg');
+        WP_Mock::userFunction('add_query_arg');
+        WP_Mock::userFunction('wp_remote_post');
+        // Simulate an error response from wp_remote_post
+        WP_Mock::userFunction('wp_remote_retrieve_body', [
+            'return' => '{
+                "status": "ok",
+                "totalResults": 268,
+                "articles": [
+                    {
+                        "source": {
+                            "id": null,
+                            "name": "Hotnews.ro"
+                        },
+                        "author": "Mihai Bianca",
+                        "title": "fanatik.ro: I se spune Maldive de Europa. Se ajunge ușor din România și e de 3 ori mai ieftină decât Grecia sau Turcia",
+                        "description": "Descoperă țara din Balcani cu cea mai impetuoasă dezvoltare la nivel de turism. Este catalogată ca având plaje la fel ca în Maldive. Maldive de Europa, adică un joc frumos de cuvinte, dar și un…",
+                        "url": "http://hotnews.ro/fanatik-ro-i-se-spune-maldive-de-europa-se-ajunge-usor-din-romania-si-e-de-3-ori-mai-ieftina-decat-grecia-sau-turcia-1532267",
+                        "urlToImage": "https://hotnews.ro/wp-content/uploads/2024/06/Screenshot-2024-06-29-105522.png",
+                        "publishedAt": "2024-06-29T07:56:14Z",
+                        "content": "Descoper ara din Balcani cu cea mai impetuoas dezvoltare la nivel de turism. Este catalogat ca având plaje la fel ca în Maldive.\r\nMaldive de Europa, adic un joc frumos de cuvinte, dar i un loc pentru… [+310 chars]"
+                    }
+                ]
+            }',
+        ]);
         // Mock POST request with submit
         $_POST = [
             'submit' => true,
-            'aic_entries_nonce' => 'fake_nonce',
+            'aic_entries_nonce' => 'fake_nonce', 
             'question' => 'test question',
             'num_calls' => 1,
             'api_key' => 'test_api_key',

@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       AI Entries
  * Description:       Automates the creation of standard WordPress posts.
- * Version:           1.0.3
+ * Version:           1.0.7
  * Requires at least: 5.2
  * Requires PHP:      7.2
  * Author:            Julio Bermúdez
