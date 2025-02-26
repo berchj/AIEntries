@@ -1,14 +1,11 @@
 <?php
-require_once dirname(__FILE__) . '/class-ai-entries-cron.php';
-require_once dirname(__FILE__) . '/class-ai-entries-api.php';
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 ?>
 <div class="wrap">
     <h2>AIEntries Settings</h2>
-   
-    
     <p>This plugin runs once a day according to the following parameters:</p>
-    <form method="post" action="">
-    <?php wp_nonce_field('aic_entries_settings_nonce', 'aic_entries_nonce');?>
+    <form id="ai-entries-form" method="post" action="">
+        <?php wp_nonce_field('aic_entries_settings_nonce', 'aic_entries_nonce'); ?>
         <label for="question">
             <h3>Theme about the entries you want to create:</h3>
         </label>
@@ -36,27 +33,27 @@ require_once dirname(__FILE__) . '/class-ai-entries-api.php';
             <h3>Category Name for the posts:</h3>
         </label>
         <input type="text" id="category" name="category" value="<?php echo esc_attr($category); ?>" required><br><br>
-        <input type="submit" name="submit" value="Submit">
+        <input type="submit" id="submit-button"  name="submit" value="Submit">
     </form>
 
     <?php if (!empty($errors)): ?>
-        <h3>Errors during creation of posts: <?php echo count($errors) ?></h3>
-        <p>The creation of the posts could fail due to the request made to the model API, remember that if the API key you are using is free it could generate this type of errors due to limitations with the requests.
-            For more information <a target="_blank" href="https://gemini.google.com/advanced?utm_source=google&utm_medium=cpc&utm_campaign=sem_lp_sl&gad_source=1&gclid=CjwKCAjwqMO0BhA8EiwAFTLgII3-Yyyf4-LZHwQgJNtl7-LAGz9OmcyBNtUVowaQXhznCYZx3qlGCxoCyvUQAvD_BwE">click here</a></p>
+        <h3>Errors during creation of posts: <?php echo count($errors); ?></h3>
+        <p>The creation of the posts could fail due to the request made to the model API, remember that if the API key you are using is free it could generate this type of errors due to limitations with the requests. For more information <a target="_blank" href="https://gemini.google.com/advanced?utm_source=google&utm_medium=cpc&utm_campaign=sem_lp_sl&gad_source=1&gclid=CjwKCAjwqMO0BhA8EiwAFTLgII3-Yyyf4-LZHwQgJNtl7-LAGz9OmcyBNtUVowaQXhznCYZx3qlGCxoCyvUQAvD_BwE">click here</a></p>
         <?php foreach ($errors as $error): ?>
             <p style="color: red;">1 post create failed due to: <?php echo esc_html($error); ?></p>
-        <?php endforeach;?>
-    <?php endif;?>
+        <?php endforeach; ?>
+    <?php endif; ?>
 
-    <?php if (!empty(AIEntries_API::$responses )): ?>
+    <?php if (!empty(AIEntries_API::$responses)): ?>
         <h3>Posts Created by GEMINI's API Call:</h3>
         <?php foreach (AIEntries_API::$responses as $response): ?>
-            <pre><a href="<?php echo esc_html(get_post_permalink($response->ID)); ($response->ID); ?>" target="_blank"><?php echo esc_html(get_the_title($response->ID)); ?></a></pre>
-        <?php endforeach;?>
-    <?php endif;?>    
+            <pre><a href="<?php echo esc_url(get_post_permalink($response->ID)); ?>" target="_blank"><?php echo esc_html(get_the_title($response->ID)); ?></a></pre>
+        <?php endforeach; ?>
+    <?php endif; ?>
+    
     <p style="color: red;"><b>DISCLAIMER: this is a work in progress. The quantity of posts created by this plugin depends on your API key limitations</b></p>
-    <p><a target="_blank" href="https://github.com/berchj/AIEntries">mantain and scale this plugin</a></p>
-    <h3>Wordpress Cron tasks scheduled by this plugin:</h3>
+    <p><a target="_blank" href="https://github.com/berchj/AIEntries">maintain and scale this plugin</a></p>
+    <h3>WordPress Cron tasks scheduled by this plugin:</h3>
     <?php
         AIEntries_Cron::show_all_cron_tasks();
     ?>

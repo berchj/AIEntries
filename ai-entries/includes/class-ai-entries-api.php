@@ -1,25 +1,26 @@
 <?php
 
-class AIEntries_API
-{
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
+class AIEntries_API {
     public static $responses = array();
-    public static function fetch_news()
-    {
+
+    public static function fetch_news() {
         $api_base_url = 'https://newsapi.org/v2/everything';
 
         // Construir la URL completa con los parámetros
         $url = add_query_arg(array(
-            'q' => get_option('AIEntries_question', ''),
-            'apiKey' => get_option('AIEntries_news_api_key', ''),
-            'pageSize' => get_option('AIEntries_num_calls', 1),
+            'q' => sanitize_text_field(get_option('AIEntries_question', '')),
+            'apiKey' => sanitize_text_field(get_option('AIEntries_news_api_key', '')),
+            'pageSize' => intval(get_option('AIEntries_num_calls', 1)),
         ), $api_base_url);
 
         // Realizar la solicitud GET utilizando wp_remote_get
-        $response = wp_remote_get($url, array('headers' => array('User-Agent' => get_option('AIEntries_news_api_key', ''))));
+        $response = wp_remote_get($url, array('headers' => array('User-Agent' => sanitize_text_field(get_option('AIEntries_news_api_key', '')))));
 
         // Verificar si la solicitud fue exitosa
         if (is_wp_error($response)) {
-            return "Error: " . $response->get_error_message();
+            return "Error: " . esc_html($response->get_error_message());
         }
 
         $body = wp_remote_retrieve_body($response);
@@ -28,26 +29,27 @@ class AIEntries_API
         $data = json_decode($body, true);
 
         // Devolver los datos decodificados
-        return $data['articles'];
+        return isset($data['articles']) ? $data['articles'] : [];
     }
 
-    public static function call($question, $api_key, $category_name, $iterator = "")
-    {
+    public static function call($question, $api_key, $category_name, $iterator = "") {
         $news_articles = self::fetch_news();
-        
+        echo $news_articles;
         foreach ($news_articles as $key => $value) {
-            // URL for the API call
-            $url = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' . $api_key;
+            $title = sanitize_text_field($value['title']);
+            $description = sanitize_text_field($value['description']);
+            $content = sanitize_text_field($value['content']);
 
-            // Request arguments
+            $url = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' . urlencode($api_key);
+
             $args = array(
-                'timeout' => 60,
+                'timeout' => 600,
                 'body' => wp_json_encode(array(
                     "contents" => array(
                         array(
                             "parts" => array(
                                 array(
-                                    "text" => "Analize this article : {'title':'" . wp_json_encode($value['title']) . "','description':'" . wp_json_encode($value['description']) . "','content':'" . wp_json_encode($value['content']) . "'} . Now write 1 related original article in english using this JSON schema : {'title': str,'content':str} (Return only the JSON String without spaces) the title must be good for SEO and the content must be in html string",
+                                    "text" => "Analyze this article : {'title':'" . wp_json_encode($title) . "','description':'" . wp_json_encode($description) . "','content':'" . wp_json_encode($content) . "'} . Now write 1 related original article in english using this JSON schema : {'title': str,'content':str} (Return only the JSON String without spaces) the title must be good for SEO and the content must be in html string",
                                 ),
                             ),
                         ),
@@ -59,17 +61,14 @@ class AIEntries_API
                 'method' => 'POST',
             );
 
-            // Response
             $response = wp_remote_post($url, $args);
-
-            // If anything goes wrong
+            echo $response;
             if (is_wp_error($response)) {
-                return new WP_Error('api_error', $response->get_error_message());
+                return new WP_Error('api_error', esc_html($response->get_error_message()));
             }
 
-            // Retrieve body
             $body = wp_remote_retrieve_body($response);
-            // Format data
+
             if (empty($body)) {
                 return new WP_Error('api_error', 'Empty response from API.');
             }
@@ -80,25 +79,27 @@ class AIEntries_API
                 return new WP_Error('api_error', 'Invalid API response structure.');
             }
 
-            // AI Post
             $article = json_decode($data['candidates'][0]['content']['parts'][0]['text'], true);
-           
+
             if (!isset($article['title']) || !isset($article['content'])) {
                 return new WP_Error('api_error', 'API response does not contain title or content.');
             }
-            
-            self::create_new_entry($article['title'], $article['content'], $category_name);
+
+            $title = sanitize_text_field($article['title']);
+            $content = wp_kses_post($article['content']);
+            $category_name = sanitize_text_field($category_name);
+
+            self::create_new_entry($title, $content, $category_name);
         }
     }
 
-    private static function create_new_entry($title, $content, $category_name)
-    {
+    private static function create_new_entry($title, $content, $category_name) {
         if (current_user_can('publish_posts')) {
             $category_id = get_term_by('name', $category_name, 'category');
             if (!$category_id) {
                 $new_category = wp_insert_term($category_name, 'category');
                 if (is_wp_error($new_category)) {
-                    return new WP_Error('insert_error', $new_category->get_error_message());
+                    return new WP_Error('insert_error', esc_html($new_category->get_error_message()));
                 }
                 $category_id = $new_category['term_id'];
             } else {
@@ -115,31 +116,29 @@ class AIEntries_API
             $post_id = wp_insert_post($new_entry);
 
             if (is_wp_error($post_id)) {
-                return new WP_Error('insert_error', $post_id->get_error_message());
+                return new WP_Error('insert_error', esc_html($post_id->get_error_message()));
             } else {
 
                 self::generate_post_image_with_AI($title, $post_id);
-                //self::set_featured_image_from_base64($base64_image, $post_id);
 
                 wp_clear_scheduled_hook('AIEntries_daily_cron_job');
 
                 wp_schedule_event(strtotime('now') + (1 * 60 * 60), 'hourly', 'AIEntries_daily_cron_job');
 
-                array_push(self::$responses,get_post($post_id));
+                array_push(self::$responses, get_post($post_id));
 
             }
         }
         return new WP_Error('permission_error', 'You do not have permission to publish posts.');
     }
 
-    private static function generate_post_image_with_AI($title, $post_id)
-    {
+    private static function generate_post_image_with_AI($title, $post_id) {
         $base_url = 'https://api.stability.ai';
         $url = "$base_url/v1/generation/stable-diffusion-v1-6/text-to-image";
-        $api_key_stable_diffusion = get_option('AIEntries_api_key_stable_diffusion', '');
+        $api_key_stable_diffusion = sanitize_text_field(get_option('AIEntries_api_key_stable_diffusion', ''));
 
         $body = wp_json_encode(array(
-            "text_prompts" => array(array("text" => $title .'. without texts in the image.')),
+            "text_prompts" => array(array("text" => sanitize_text_field($title) . '. without texts in the image.')),
             "cfg_scale" => 7,
             "height" => 1024,
             "width" => 1024,
@@ -153,7 +152,7 @@ class AIEntries_API
             'headers' => array(
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-                'Authorization' => "Bearer $api_key_stable_diffusion",
+                'Authorization' => "Bearer " . $api_key_stable_diffusion,
             ),
             'body' => $body,
         ));
@@ -163,14 +162,17 @@ class AIEntries_API
         }
         
         $body_request = json_decode($response['body'], true);
-        
+
+        if (!isset($body_request['artifacts'][0]['base64'])) {
+            return false;
+        }
+
         $base64_image = $body_request['artifacts'][0]['base64'];
 
         if (!is_int($post_id)) {
             return false;
         }
 
-        // Inicializar WP_Filesystem
         WP_Filesystem();
 
         global $wp_filesystem;
@@ -178,7 +180,6 @@ class AIEntries_API
         $upload_dir = wp_upload_dir();
         $file_path = $upload_dir['path'] . '/' . uniqid() . '.jpg';
 
-        // Usar WP_Filesystem para escribir el contenido en el archivo
         if (!$wp_filesystem->put_contents($file_path, base64_decode($base64_image), FS_CHMOD_FILE)) {
             return false;
         }

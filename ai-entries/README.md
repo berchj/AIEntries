@@ -1,41 +1,57 @@
 === AI Entries ===
 
-Contributors:      Julio Bermúdez
-Tested up to:      6.6
-Stable tag:        1.0.7
-License:           GPLv2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              plugin best practices, accessibility, performance, security, automation
-
-This plugin uses Google artificial intelligence (GEMINI) and stability ai.
-
+Contributors:      berchj  
+Tested up to:      6.6  
+Stable tag:        1.0.7  
+License:           GPLv2 or later  
+License URI:       https://www.gnu.org/licenses/gpl-2.0.html  
+Tags:              AI, Content Generation, Automated Publishing, News, Image Generation, SEO, WordPress Automation, Media Management
 
 == Description ==
 
-You need to have a GEMINI API KEY to use this plugin. 
+This plugin uses Google artificial intelligence (GEMINI), Stability AI, and News API to automate the creation of WordPress posts based on configurable parameters from the WordPress admin view. It generates original content based on real articles and creates featured images accordingly.
 
-You can get one for free here : https://ai.google.dev/gemini-api/docs/api-key
+To use this plugin, you must obtain API keys from all services:
 
-You need to have a stability.ai API KEY to use this plugin. 
+- **GEMINI API**: You need a GEMINI API KEY, which you can get for free [here](https://ai.google.dev/gemini-api/docs/api-key).
+  
+    - **Service URL**: `https://ai.google.dev/`
+    - **Terms of Use**: [Google API Terms](https://policies.google.com/terms)
+    - **Privacy Policy**: [Google API Privacy](https://policies.google.com/privacy)
 
-You can get one for free here : https://platform.stability.ai/
+  
+- **Stability AI API**: You also need a Stability.ai API KEY, available for free [here](https://platform.stability.ai/).
+
+    - **Service URL**: `https://stability.ai/`
+    - **Terms of Use**: [Stability AI Terms](https://stability.ai/terms-of-use)
+    - **Privacy Policy**: [Stability AI Privacy](https://stability.ai/privacy-policy)
+
+- **News API**: You need a News API KEY, which you can get for free [here](https://newsapi.org/).
+
+    - **Service URL**: `https://newsapi.org`
+    - **Privacy Policy**: [News API Privacy](https://newsapi.org/privacy)
+    - **Terms of Use**: [News API Terms](https://newsapi.org/terms)
+
+Please note that the performance and availability of functionalities depend on these APIs, and usage is subject to their respective terms and conditions.
 
 == Installation ==
 
 = Installation from within WordPress =
 
 1. Visit **Plugins > Add New**.
-2. Search for **Plugin Check**.
-3. Install and activate the Plugin.
+2. Search for **AI Entries**.
+3. Install and activate the plugin.
 
 == Frequently Asked Questions ==
 
-= Where can I contribute to the plugin? =
+= Where can I contribute or report bugs of this plugin? =
 
-All development for this plugin is handled via [GitHub](https://github.com/berchj/AIEntries) any issues or pull requests should be posted there.
-
+This is an open-source project. All development for this plugin is handled via [GitHub](https://github.com/berchj/AIEntries). Any issues or pull requests should be posted there.
 
 = Why aren't all posts always created? =
 
-The functionality of this plugin depends on external systems which we use through http calls, the API keys that you get for free could also affect the performance of the plugin.
+The functionality of this plugin depends on external systems accessed through HTTP calls. The performance of the plugin may be affected by the free API keys and the limitations or changes in the service provided by these APIs.
 
+== Support ==
+
+For support, email juliobermudezch@gmail.com .
