@@ -22,7 +22,7 @@ class AIEntries_Cron
         }
     }
 
-    public function daily_task()
+    public static function daily_task()
     {
         $question = get_option('AIEntries_question', '');
         $num_calls = get_option('AIEntries_num_calls', 1);
