@@ -32,16 +32,46 @@ class AIEntries_API
         return $data['articles'];
     }
 
-    public static function call($question, $api_key, $category_name, $iterator = "") {
+    public static function call($question, $api_key, $category_name, $iterator = "")
+    {
+
+        // Verificar cuántos posts AI se han creado hoy
+        $today = date('Y-m-d');
+        $args = array(
+            'meta_key' => 'ai_entries_post', // Filtra solo los posts generados por este método
+            'date_query' => array(
+                array(
+                    'year' => date('Y'),
+                    'month' => date('m'),
+                    'day' => date('d'),
+                ),
+            ),
+            'post_type' => 'post',
+            'post_status' => 'publish',
+            'posts_per_page' => -1, // Obtener todos los posts publicados hoy
+        );
+
+        $today_posts = new WP_Query($args);
+        $count_posts_today = $today_posts->found_posts;
+
+        // Limitar a 5 posts por día
+        if ($count_posts_today >= 5) {
+            return new WP_Error('limit_reached', 'You have reached the daily limit of 5 posts.');
+        }
+
+        // Continuar ejecutando solo si hay espacio para más posts
         $news_articles = self::fetch_news();
-    
+        $posts_to_create = min(5 - $count_posts_today, get_option('AIEntries_num_calls', 1));
         foreach ($news_articles as $key => $value) {
+            if ($posts_to_create <= 0) {
+                break; // Salir si se ha alcanzado el límite
+            }
             $title = sanitize_text_field($value['title']);
             $description = sanitize_text_field($value['description']);
             $content = sanitize_text_field($value['content']);
-    
+
             $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . urlencode($api_key);
-    
+
             $args = array(
                 'timeout' => 600,
                 'body' => wp_json_encode(array(
@@ -60,45 +90,55 @@ class AIEntries_API
                 ),
                 'method' => 'POST',
             );
-    
+
             $response = wp_remote_post($url, $args);
-            
+
             if (is_wp_error($response)) {
                 return new WP_Error('api_error', esc_html($response->get_error_message()));
             }
-    
+
             $body = wp_remote_retrieve_body($response);
-    
+
             if (empty($body)) {
                 return new WP_Error('api_error', 'Empty response from API.');
             }
-    
+
             $data = json_decode($body, true);
-    
+
             if (!isset($data['candidates'][0]['content']['parts'][0]['text'])) {
                 return new WP_Error('api_error', 'Invalid API response structure.');
             }
-    
+
             // Manejo de la respuesta para obtener el artículo
             $responseText = $data['candidates'][0]['content']['parts'][0]['text'];
             $responseText = trim($responseText, "```json\n"); // Elimina delimitadores de código.
             $responseText = trim($responseText, "\n```");
-    
+
             $article = json_decode($responseText, true);
-    
+
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return new WP_Error('api_error', 'JSON decode error: ' . json_last_error_msg());
             }
-    
+
             if (!isset($article['title']) || !isset($article['content'])) {
                 return new WP_Error('api_error', 'Invalid article structure', $data);
             }
-    
+
+            // Mejorando el formato del título
             $title = sanitize_text_field($article['title']);
+            $title = preg_replace('/(?<!\w)([A-Z])/', ' $1', $title); // Separar palabras (camel case)
+            $title = trim($title); // Eliminar espacios adicionales
+            $title = ucwords(strtolower($title)); // Capitalizar palabras
+
+            // Mejorando el formato del contenido
             $content = wp_kses_post($article['content']);
+            $content = preg_replace('/(\s+[,.!?]+)/', '$1 ', $content); // Asegurar espacios después de puntuación
+            $content = html_entity_decode($content); // Decodificar entidades HTML si es necesario
+
             $category_name = sanitize_text_field($category_name);
-    
+
             self::create_new_entry($title, $content, $category_name);
+            $posts_to_create--;
         }
     }
 
@@ -128,14 +168,15 @@ class AIEntries_API
             if (is_wp_error($post_id)) {
                 return new WP_Error('insert_error', $post_id->get_error_message());
             } else {
-                $base64_image = self::generate_post_image_with_AI($title);
+                // Agregar meta campo para seguir la creación del post
+                add_post_meta($post_id, 'ai_entries_post', true);
 
+                $base64_image = self::generate_post_image_with_AI($title);
+                
                 self::set_featured_image_from_base64($base64_image, $post_id);
 
                 wp_clear_scheduled_hook('AIEntries_daily_cron_job');
-
                 wp_schedule_event(strtotime('now') + (1 * 60 * 60), 'hourly', 'AIEntries_daily_cron_job');
-
                 array_push(self::$responses, get_post($post_id));
 
                 return get_post($post_id);

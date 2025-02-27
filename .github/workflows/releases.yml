@@ -11,35 +11,39 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    
     - uses: actions/checkout@v4
     
     - name: Install dependencies 
       run: npm i
       
-    - name: start wordpress local environment
+    - name: Start WordPress local environment
       run: npx wp-env start --xdebug=coverage
 
-    - name: install phpUnit
-      run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require phpunit/phpunit  --dev --with-all-dependencies
+    - name: Install PHPUnit
+      run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require phpunit/phpunit --dev --with-all-dependencies
       
-    - name: install phpunit-polyfills
-      run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require yoast/phpunit-polyfills  --dev --with-all-dependencies
+    - name: Install PHPUnit Polyfills
+      run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require yoast/phpunit-polyfills --dev --with-all-dependencies
     
-    - name : install wp_mock
+    - name: Install WP Mock
       run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require 10up/wp_mock --dev --with-all-dependencies
       
-    - name: run phpUnit tests
+    - name: Run PHPUnit tests
       run: npx wp-env run tests-cli --env-cwd=wp-content/plugins/ai-entries ./vendor/bin/phpunit ./tests/classes --bootstrap ./tests/bootstrap.php --testdox --colors
   
   release:
     name: Release pushed tag
     runs-on: ubuntu-22.04
     steps:
+      - name: Create Plugin ZIP
+        run: cd ./AIEntries/ai-entries/ && zip -r ai-entries.zip .  
+
+      - name: List Directory Contents
+        run: ls -R ./AIEntries/ai-entries/  
+
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -55,4 +59,4 @@ jobs:
         uses: actions/upload-artifact@v4  
         with:
           name: ai-entries
-          path: ./AIEntries/ai-entries/*
+          path: ./AIEntries/ai-entries/ai-entries.zip  
