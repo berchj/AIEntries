@@ -3,61 +3,103 @@
 class AIEntries_API
 {
 
-    public static function call($question, $api_key, $category_name, $iterator = "")
+    public static $responses = array();
+    public static function fetch_news()
     {
-        // URL for the API call
-        $url = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' . $api_key;
+        $api_base_url = 'https://newsapi.org/v2/everything';
 
-        // Request arguments
-        $args = array(
-            'timeout' => 60,
-            'body' => wp_json_encode(array(
-                "contents" => array(
-                    array(
-                        "parts" => array(
-                            array(
-                                "text" => "List 1 " . $iterator . " article about " . $question . ". Using this JSON schema :{'title': str,'content':str} (Return only the JSON String without spaces) the title must be good for SEO and the content must be in html string",
+        // Construir la URL completa con los parámetros
+        $url = add_query_arg(array(
+            'q' => get_option('AIEntries_question', ''),
+            'apiKey' => get_option('AIEntries_news_api_key', ''),
+            'pageSize' => get_option('AIEntries_num_calls', 1),
+        ), $api_base_url);
+
+        // Realizar la solicitud GET utilizando wp_remote_get
+        $response = wp_remote_get($url, array('headers' => array('User-Agent' => get_option('AIEntries_news_api_key', ''))));
+
+        // Verificar si la solicitud fue exitosa
+        if (is_wp_error($response)) {
+            return "Error: " . $response->get_error_message();
+        }
+
+        $body = wp_remote_retrieve_body($response);
+
+        // Decodificar el cuerpo de la respuesta JSON
+        $data = json_decode($body, true);
+
+        // Devolver los datos decodificados
+        return $data['articles'];
+    }
+
+    public static function call($question, $api_key, $category_name, $iterator = "") {
+        $news_articles = self::fetch_news();
+    
+        foreach ($news_articles as $key => $value) {
+            $title = sanitize_text_field($value['title']);
+            $description = sanitize_text_field($value['description']);
+            $content = sanitize_text_field($value['content']);
+    
+            $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . urlencode($api_key);
+    
+            $args = array(
+                'timeout' => 600,
+                'body' => wp_json_encode(array(
+                    "contents" => array(
+                        array(
+                            "parts" => array(
+                                array(
+                                    "text" => "Analyze this article: {'title':'" . wp_json_encode($title) . "','description':'" . wp_json_encode($description) . "','content':'" . wp_json_encode($content) . "'}. Now write 1 related original article in English using this JSON schema: {'title': str,'content':str} (Return only the JSON String without spaces and blank spaces or \n) the title must be good for SEO and the content must be in HTML string",
+                                ),
                             ),
                         ),
                     ),
+                )),
+                'headers' => array(
+                    'Content-Type' => 'application/json',
                 ),
-            )),
-            'headers' => array(
-                'Content-Type' => 'application/json',
-            ),
-            'method' => 'POST',
-        );
-
-        // Response
-        $response = wp_remote_post($url, $args);
-
-        // If anything goes wrong
-        if (is_wp_error($response)) {
-            return new WP_Error('api_error', $response->get_error_message());
+                'method' => 'POST',
+            );
+    
+            $response = wp_remote_post($url, $args);
+            
+            if (is_wp_error($response)) {
+                return new WP_Error('api_error', esc_html($response->get_error_message()));
+            }
+    
+            $body = wp_remote_retrieve_body($response);
+    
+            if (empty($body)) {
+                return new WP_Error('api_error', 'Empty response from API.');
+            }
+    
+            $data = json_decode($body, true);
+    
+            if (!isset($data['candidates'][0]['content']['parts'][0]['text'])) {
+                return new WP_Error('api_error', 'Invalid API response structure.');
+            }
+    
+            // Manejo de la respuesta para obtener el artículo
+            $responseText = $data['candidates'][0]['content']['parts'][0]['text'];
+            $responseText = trim($responseText, "```json\n"); // Elimina delimitadores de código.
+            $responseText = trim($responseText, "\n```");
+    
+            $article = json_decode($responseText, true);
+    
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return new WP_Error('api_error', 'JSON decode error: ' . json_last_error_msg());
+            }
+    
+            if (!isset($article['title']) || !isset($article['content'])) {
+                return new WP_Error('api_error', 'Invalid article structure', $data);
+            }
+    
+            $title = sanitize_text_field($article['title']);
+            $content = wp_kses_post($article['content']);
+            $category_name = sanitize_text_field($category_name);
+    
+            self::create_new_entry($title, $content, $category_name);
         }
-
-        // Retrieve body
-        $body = wp_remote_retrieve_body($response);
-
-        // Format data
-        if (empty($body)) {
-            return new WP_Error('api_error', 'Empty response from API.');
-        }
-
-        $data = json_decode($body, true);
-
-        if (!isset($data['candidates'][0]['content']['parts'][0]['text'])) {
-            return new WP_Error('api_error', 'Invalid API response structure.');
-        }
-
-        // AI Post
-        $article = json_decode($data['candidates'][0]['content']['parts'][0]['text'], true);
-
-        if (!isset($article['title']) || !isset($article['content'])) {
-            return new WP_Error('api_error', 'API response does not contain title or content.');
-        }
-
-        return self::create_new_entry($article['title'], $article['content'], $category_name);
     }
 
     private static function create_new_entry($title, $content, $category_name)
@@ -87,11 +129,14 @@ class AIEntries_API
                 return new WP_Error('insert_error', $post_id->get_error_message());
             } else {
                 $base64_image = self::generate_post_image_with_AI($title);
+
                 self::set_featured_image_from_base64($base64_image, $post_id);
 
                 wp_clear_scheduled_hook('AIEntries_daily_cron_job');
 
-                wp_schedule_event(strtotime('now') + (1 * 60 * 60) , 'hourly', 'AIEntries_daily_cron_job');
+                wp_schedule_event(strtotime('now') + (1 * 60 * 60), 'hourly', 'AIEntries_daily_cron_job');
+
+                array_push(self::$responses, get_post($post_id));
 
                 return get_post($post_id);
             }

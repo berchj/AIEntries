@@ -35,3 +35,24 @@ jobs:
       
     - name: run phpUnit tests
       run: npx wp-env run tests-cli --env-cwd=wp-content/plugins/ai-entries ./vendor/bin/phpunit ./tests/classes --bootstrap ./tests/bootstrap.php --testdox --colors
+  
+  release:
+    name: Release pushed tag
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: "release-${{ github.sha }}"
+          commit_message: ${{ github.event.head_commit.message }} 
+        run: |
+          gh release create "$tag" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="${commit_message}" \
+              --generate-notes
+
+      - name: Upload Plugin ZIP
+        uses: actions/upload-artifact@v4  
+        with:
+          name: ai-entries
+          path: ./ai-entries/*
