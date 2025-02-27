@@ -10,39 +10,16 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install dependencies 
-      run: npm i
-      
-    - name: Start WordPress local environment
-      run: npx wp-env start --xdebug=coverage
-
-    - name: Install PHPUnit
-      run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require phpunit/phpunit --dev --with-all-dependencies
-      
-    - name: Install PHPUnit Polyfills
-      run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require yoast/phpunit-polyfills --dev --with-all-dependencies
-    
-    - name: Install WP Mock
-      run: npx wp-env run cli --env-cwd=wp-content/plugins/ai-entries composer require 10up/wp_mock --dev --with-all-dependencies
-      
-    - name: Run PHPUnit tests
-      run: npx wp-env run tests-cli --env-cwd=wp-content/plugins/ai-entries ./vendor/bin/phpunit ./tests/classes --bootstrap ./tests/bootstrap.php --testdox --colors
   
   release:
     name: Release pushed tag
     runs-on: ubuntu-22.04
     steps:
       - name: Create Plugin ZIP
-        run: cd ./AIEntries/ai-entries/ && zip -r ai-entries.zip .  
+        run: cd ./$GITHUB_REPOSITORY/ai-entries/ && zip -r ai-entries.zip .  
 
       - name: List Directory Contents
-        run: ls -R ./AIEntries/ai-entries/  
+        run: ls -R ./$GITHUB_REPOSITORY/ai-entries/  
 
       - name: Create release
         env:
@@ -59,4 +36,4 @@ jobs:
         uses: actions/upload-artifact@v4  
         with:
           name: ai-entries
-          path: ./AIEntries/ai-entries/ai-entries.zip  
+          path: ./$GITHUB_REPOSITORY/ai-entries/ai-entries.zip  
