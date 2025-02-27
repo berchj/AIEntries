@@ -1,39 +1,18 @@
-name: Run Tests
+name: Build release zip
 
 on:
   push:
-    branches: [ "release" ]
-  pull_request:
-    branches: [ "release" ]
-
-permissions:
-  contents: write
+    branches:
+    - release
 
 jobs:
-  
-  release:
-    name: Release pushed tag
+  build:
+    name: Build release zip
     runs-on: ubuntu-latest
     steps:
-      - name: Create Plugin ZIP
-        run: ls
-
-      - name: List Directory Contents
-        run: ls -R ./ai-entries/  
-
-      - name: Create release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          tag: "release-${{ github.sha }}"
-          commit_message: ${{ github.event.head_commit.message }} 
-        run: |
-          gh release create "$tag" \
-              --repo="$GITHUB_REPOSITORY" \
-              --title="${commit_message}" \
-              --generate-notes
-
-      - name: Upload Plugin ZIP
-        uses: actions/upload-artifact@v4  
-        with:
-          name: ai-entries
-          path: ./ai-entries/ai-entries.zip  
+    - name: Checkout
+      uses: actions/checkout@v4    
+    - name: Generate zip
+      uses: 10up/action-wordpress-plugin-build-zip@stable
+      env:
+        SLUG: my-super-cool-plugin # optional, remove if GitHub repo name matches SVN slug, including capitalization
