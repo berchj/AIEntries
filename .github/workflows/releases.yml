@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Create Plugin ZIP
-        run: cd ./$GITHUB_REPOSITORY/ai-entries/ && zip -r ai-entries.zip .  
+        run: cd ./ai-entries/ && zip -r ai-entries.zip .  
 
       - name: List Directory Contents
-        run: ls -R ./$GITHUB_REPOSITORY/ai-entries/  
+        run: ls -R ./ai-entries/  
 
       - name: Create release
         env:
@@ -36,4 +36,4 @@ jobs:
         uses: actions/upload-artifact@v4  
         with:
           name: ai-entries
-          path: ./$GITHUB_REPOSITORY/ai-entries/ai-entries.zip  
+          path: ./ai-entries/ai-entries.zip  
