@@ -24,3 +24,7 @@ destroy:
 # Debug environment
 debug:
 	npx wp-env logs --debug --watch
+
+# Copiar el contenido del directorio
+copy:
+	cp -R ./ai-entries/* ../ai-entries/trunk/

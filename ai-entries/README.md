@@ -2,7 +2,7 @@
 
 Contributors:      berchj  
 Tested up to:      6.6  
-Stable tag:        1.0.7  
+Stable tag:        1.0.9  
 License:           GPLv2 or later  
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html  
 Tags:              AI, automated publishing, content generation, image-generation , news
@@ -44,6 +44,10 @@ Please note that the performance and availability of functionalities depend on t
 1. Visit **Plugins > Add New**.
 2. Search for **AI Entries**.
 3. Install and activate the plugin.
+
+== Screenshots ==
+
+1. Setup Wizard to generate posts
 
 == Frequently Asked Questions ==
 

@@ -4,7 +4,6 @@
 
 require_once __DIR__ . '/../../includes/class-ai-entries-settings.php';
 require_once __DIR__ . '/../../includes/class-ai-entries-api.php';
-require_once __DIR__ . '/../../includes/class-ai-entries-cron.php';
 require_once __DIR__ . '/../../includes/class-ai-entries.php';
 
 

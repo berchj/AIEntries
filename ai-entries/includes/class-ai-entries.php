@@ -28,19 +28,14 @@ class AIEntries
     {
         require_once plugin_dir_path(__FILE__) . 'class-ai-entries-settings.php';
         require_once plugin_dir_path(__FILE__) . 'class-ai-entries-api.php';
-        require_once plugin_dir_path(__FILE__) . 'class-ai-entries-cron.php';
+        
     }
 
     private function init_hooks()
     {
         add_action('admin_menu', ['AIEntries_Settings', 'add_menu_page']);
-        add_action('wp', ['AIEntries_Cron', 'check_six_hour_function']);      
-        add_action('AIEntries_daily_cron_job', ['AIEntries_Cron', 'daily_task']);        
+               
     }
 
-    public static function deactivate()
-    {
-        $timestamp = wp_next_scheduled('AIEntries_daily_cron_job');
-        wp_unschedule_event($timestamp, 'AIEntries_daily_cron_job');
-    }
+    
 }

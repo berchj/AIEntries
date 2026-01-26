@@ -175,8 +175,7 @@ class AIEntries_API
                 
                 self::set_featured_image_from_base64($base64_image, $post_id);
 
-                wp_clear_scheduled_hook('AIEntries_daily_cron_job');
-                wp_schedule_event(strtotime('now') + (1 * 60 * 60), 'hourly', 'AIEntries_daily_cron_job');
+                
                 array_push(self::$responses, get_post($post_id));
 
                 return get_post($post_id);
